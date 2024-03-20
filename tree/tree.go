@@ -95,6 +95,7 @@ func (ts *treeSlab) insertIntoBranch(branch_index, insert_index, leaf uint32) ui
 
 // insertIntoNode inserts a new leaf node into the treeSlab at the given node index, returning a new branch node index.
 func (ts *treeSlab) insertIntoNode(node_index, insert_index, leaf uint32) uint32 {
+	// TODO: technically this should actually be able to insert entire sub-trees, not just leaves
 	if ts.nodes[node_index].leaf {
 		return ts.insertIntoLeaf(node_index, insert_index, leaf)
 	}

@@ -34,9 +34,6 @@ func TestNewTreeSlab(t *testing.T) {
 	if cap(ts.nodes) != INITIAL_SLAB_CAPACITY {
 		t.Fail()
 	}
-	if ts.root != 0 {
-		t.Fail()
-	}
 }
 
 func TestByteCount(t *testing.T) {
@@ -171,7 +168,6 @@ func TestGetLeaves(t *testing.T) {
 	}
 	li2 := ts.addLeaf(1, 1)
 	bi1 := ts.addBranch(li1, li2)
-	ts.root = bi1
 	leaves = ts.getLeaves(bi1)
 	if len(leaves) != 2 {
 		t.Fail()
@@ -254,13 +250,13 @@ func TestInsertIntoLeaf(t *testing.T) {
 func TestInsertIntoBranch(t *testing.T) {
 	t.Run("branch with 2 leaves", func(t *testing.T) {
 		ts := newTreeSlab()
-		ts.root = ts.addBranch(
+		i := ts.addBranch(
 			ts.addLeaf(10, 10),
 			ts.addLeaf(20, 20),
 		)
 
 		t.Run("left", func(t *testing.T) {
-			new_index := ts.insertIntoBranch(ts.root, 0, ts.addLeaf(30, 30))
+			new_index := ts.insertIntoBranch(i, 0, ts.addLeaf(30, 30))
 			leaves := ts.getLeaves(new_index)
 			if leaves[0].x != 30 || leaves[0].y != 30 ||
 				leaves[1].x != 10 || leaves[1].y != 10 ||
@@ -275,7 +271,7 @@ func TestInsertIntoBranch(t *testing.T) {
 		})
 
 		t.Run("right", func(t *testing.T) {
-			new_index := ts.insertIntoBranch(ts.root, 10, ts.addLeaf(30, 30))
+			new_index := ts.insertIntoBranch(i, 10, ts.addLeaf(30, 30))
 			leaves := ts.getLeaves(new_index)
 			if leaves[0].x != 10 || leaves[0].y != 10 ||
 				leaves[1].x != 30 || leaves[1].y != 30 ||
@@ -292,14 +288,14 @@ func TestInsertIntoBranch(t *testing.T) {
 
 	t.Run("branch with one leaf and one branch", func(t *testing.T) {
 		ts := newTreeSlab()
-		ts.root = ts.addBranch(
+		i := ts.addBranch(
 			ts.addLeaf(10, 10),
 			ts.addBranch(
 				ts.addLeaf(20, 20),
 				ts.addLeaf(30, 30),
 			),
 		)
-		new_index := ts.insertIntoBranch(ts.root, 10, ts.addLeaf(40, 40))
+		new_index := ts.insertIntoBranch(i, 10, ts.addLeaf(40, 40))
 		leaves := ts.getLeaves(new_index)
 		if leaves[0].x != 10 || leaves[0].y != 10 ||
 			leaves[1].x != 40 || leaves[1].y != 40 ||

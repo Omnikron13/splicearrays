@@ -21,7 +21,6 @@ const INITIAL_SLAB_CAPACITY = SLAB_CHUNK_SIZE / int(NODE_BYTE_SIZE)
 // garbage collection.
 type treeSlab struct {
 	nodes []node
-	root  uint32
 }
 
 // newTreeSlab creates a new treeSlab with an initial capacity of INITIAL_SLAB_CAPACITY.

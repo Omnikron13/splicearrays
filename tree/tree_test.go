@@ -201,7 +201,7 @@ func TestInsertIntoLeaf(t *testing.T) {
 	leaf := ts.addLeaf(0, 10)
 
 	t.Run("Insert into leaf at 0", func(t *testing.T) {
-		i := ts.insertIntoLeaf(leaf, 0, 10, 2)
+		i := ts.insertIntoLeaf(leaf, 0, ts.addLeaf(10, 2))
 		node := ts.nodes[i]
 		if ts.nodes[i].String() != "branch {left: 1 right: 0}" {
 			t.Fail()
@@ -215,7 +215,7 @@ func TestInsertIntoLeaf(t *testing.T) {
 	})
 
 	t.Run("Insert into leaf at end", func(t *testing.T) {
-		i := ts.insertIntoLeaf(leaf, 10, 10, 2)
+		i := ts.insertIntoLeaf(leaf, 10, ts.addLeaf(10, 2))
 		node := ts.nodes[i]
 		if ts.nodes[i].String() != "branch {left: 0 right: 3}" {
 			t.Fatal("got:", ts.nodes[i].String(), "expected:", "branch {left: 0 right: 3}")
@@ -229,16 +229,16 @@ func TestInsertIntoLeaf(t *testing.T) {
 	})
 
 	t.Run("Insert into leaf at 2", func(t *testing.T) {
-		i := ts.insertIntoLeaf(leaf, 2, 10, 2)
+		i := ts.insertIntoLeaf(leaf, 2, ts.addLeaf(10, 2))
 		node := ts.nodes[i]
-		if ts.nodes[i].String() != "branch {left: 5 right: 8}" {
-			t.Error("got:", ts.nodes[i].String(), "expected:", "branch {left: 5 right: 8}")
+		if ts.nodes[i].String() != "branch {left: 6 right: 8}" {
+			t.Error("got:", ts.nodes[i].String(), "expected:", "branch {left: 6 right: 8}")
 		}
 		if ts.nodes[node.x].String() != "leaf {index: 0 length: 2}" {
 			t.Error("got:", ts.nodes[node.x].String(), "expected:", "leaf {index: 0 length: 2}")
 		}
-		if ts.nodes[node.y].String() != "branch {left: 6 right: 7}" {
-			t.Error("got:", ts.nodes[node.y].String(), "expected:", "branch {left: 6 right: 7}")
+		if ts.nodes[node.y].String() != "branch {left: 5 right: 7}" {
+			t.Error("got:", ts.nodes[node.y].String(), "expected:", "branch {left: 5 right: 7}")
 		}
 		node = ts.nodes[node.y]
 		if ts.nodes[node.x].String() != "leaf {index: 10 length: 2}" {
@@ -259,7 +259,7 @@ func TestInsertIntoBranch(t *testing.T) {
 		)
 
 		t.Run("left", func(t *testing.T) {
-			new_index := ts.insertIntoBranch(ts.root, 0, 30, 30)
+			new_index := ts.insertIntoBranch(ts.root, 0, ts.addLeaf(30, 30))
 			leaves := ts.getLeaves(new_index)
 			if leaves[0].x != 30 || leaves[0].y != 30 ||
 				leaves[1].x != 10 || leaves[1].y != 10 ||
@@ -274,7 +274,7 @@ func TestInsertIntoBranch(t *testing.T) {
 		})
 
 		t.Run("right", func(t *testing.T) {
-			new_index := ts.insertIntoBranch(ts.root, 10, 30, 30)
+			new_index := ts.insertIntoBranch(ts.root, 10, ts.addLeaf(30, 30))
 			leaves := ts.getLeaves(new_index)
 			if leaves[0].x != 10 || leaves[0].y != 10 ||
 				leaves[1].x != 30 || leaves[1].y != 30 ||
@@ -298,7 +298,7 @@ func TestInsertIntoBranch(t *testing.T) {
 				ts.addLeaf(30, 30),
 			),
 		)
-		new_index := ts.insertIntoBranch(ts.root, 10, 40, 40)
+		new_index := ts.insertIntoBranch(ts.root, 10, ts.addLeaf(40, 40))
 		leaves := ts.getLeaves(new_index)
 		if leaves[0].x != 10 || leaves[0].y != 10 ||
 			leaves[1].x != 40 || leaves[1].y != 40 ||

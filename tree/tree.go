@@ -101,6 +101,22 @@ func (ts *treeSlab) insertIntoNode(node_index, insert_index, leaf uint32) uint32
 	return ts.insertIntoBranch(node_index, insert_index, leaf)
 }
 
+// removeFromLeaf remove a range of indices from a leaf node in the treeSlab, returning a new leaf or branch node index,
+// or nil if the leaf node is entirely removed.
+func (ts *treeSlab) removeFromLeaf(index, start, length uint32) *uint32 {
+	// TODO: perhaps just have some kind of status/error return instead of mucking about with pointers?
+	l, r := ts.nodes[index].remove(start, length)
+	if l == nil {
+		return nil
+	}
+	if r == nil {
+		i := ts.addLeaf(l.x, l.y)
+		return &i
+	}
+	i := ts.addBranch(ts.addLeaf(l.x, l.y), ts.addLeaf(r.x, r.y))
+	return &i
+}
+
 // getLeaves returns a slice of all the leaf node indexes in the treeSlab (sub)tree starting at a given index.
 func (ts *treeSlab) getLeaves(index uint32) []node {
 	// TODO: return pointers to nodes instead of copying them?

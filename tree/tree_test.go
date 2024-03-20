@@ -311,3 +311,48 @@ func TestInsertIntoBranch(t *testing.T) {
 		}
 	})
 }
+func TestRemoveFromLeaf(t *testing.T) {
+	t.Run("all", func(t *testing.T) {
+		ts := newTreeSlab()
+		ts.addLeaf(0, 10)
+		n := ts.removeFromLeaf(0, 0, 10)
+		if n != nil {
+			t.Fail()
+		}
+	})
+
+	t.Run("start", func(t *testing.T) {
+		ts := newTreeSlab()
+		ts.addLeaf(0, 10)
+		n := ts.removeFromLeaf(0, 0, 5)
+		if ts.nodes[*n].String() != "leaf {index: 5 length: 5}" {
+			t.Errorf("Expected leaf {index: 5 length: 5}, got %s", ts.nodes[*n].String())
+		}
+	})
+
+	t.Run("end", func(t *testing.T) {
+		ts := newTreeSlab()
+		ts.addLeaf(0, 10)
+		n := ts.removeFromLeaf(0, 5, 5)
+		if ts.nodes[*n].String() != "leaf {index: 0 length: 5}" {
+			t.Errorf("Expected leaf {index: 0 length: 5}, got %s", ts.nodes[*n].String())
+		}
+	})
+
+	t.Run("middle", func(t *testing.T) {
+		ts := newTreeSlab()
+		ts.addLeaf(0, 10)
+		n := ts.removeFromLeaf(0, 3, 4)
+		if ts.nodes[*n].leaf {
+			t.Error("Expected branch node, got leaf node")
+		}
+		li := ts.nodes[*n].x
+		if ts.nodes[li].String() != "leaf {index: 0 length: 3}" {
+			t.Errorf("Expected leaf {index: 0 length: 3}, got %s", ts.nodes[li].String())
+		}
+		ri := ts.nodes[*n].y
+		if ts.nodes[ri].String() != "leaf {index: 7 length: 3}" {
+			t.Errorf("Expected leaf {index: 7 length: 3}, got %s", ts.nodes[ri].String())
+		}
+	})
+}

@@ -24,6 +24,7 @@ func (n *node) String() string {
 // If the index is the length of the node, the original node & nil is returned.
 // Otherwise, two new nodes are created and returned.
 func (n *node) split(index uint32) (*node, *node) {
+	// TODO: just delegate to remove?
 	// TODO: deal with branch nodes
 	// TODO: error handling (e.g. if index > n.y)
 	if index == 0 {

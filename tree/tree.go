@@ -76,6 +76,31 @@ func (ts *treeSlab) insertIntoLeaf(leaf_index, insert_index, x, y uint32) uint32
 	return ts.addBranch(ts.addLeaf(l.x, l.y), ts.addBranch(ts.addLeaf(x, y), ts.addLeaf(r.x, r.y)))
 }
 
+// insertIntoBranch inserts a new leaf node into the treeSlab at the given branch node index, returning a new branch node index.
+// The new leaf node is inserted into the left or right subtree of the branch node, depending on the insert_index.
+// The index of the new branch node can be used to replace the old branch node.
+func (ts *treeSlab) insertIntoBranch(branch_index, insert_index, x, y uint32) uint32 {
+	_, left := ts.byteCount(ts.nodes[branch_index].x)
+	if insert_index <= left {
+		return ts.addBranch(
+			ts.insertIntoNode(ts.nodes[branch_index].x, insert_index, x, y),
+			ts.nodes[branch_index].y,
+		)
+	}
+	return ts.addBranch(
+		ts.nodes[branch_index].x,
+		ts.insertIntoNode(ts.nodes[branch_index].y, insert_index-left, x, y),
+	)
+}
+
+// insertIntoNode inserts a new leaf node into the treeSlab at the given node index, returning a new branch node index.
+func (ts *treeSlab) insertIntoNode(node_index, insert_index, x, y uint32) uint32 {
+	if ts.nodes[node_index].leaf {
+		return ts.insertIntoLeaf(node_index, insert_index, x, y)
+	}
+	return ts.insertIntoBranch(node_index, insert_index, x, y)
+}
+
 // getLeaves returns a slice of all the leaf node indexes in the treeSlab (sub)tree starting at a given index.
 func (ts *treeSlab) getLeaves(index uint32) []node {
 	leaves := make([]node, 0, len(ts.nodes))

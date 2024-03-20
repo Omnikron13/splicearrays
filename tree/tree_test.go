@@ -249,3 +249,68 @@ func TestInsertIntoLeaf(t *testing.T) {
 		}
 	})
 }
+
+func TestInsertIntoBranch(t *testing.T) {
+	t.Run("branch with 2 leaves", func(t *testing.T) {
+		ts := newTreeSlab()
+		ts.root = ts.addBranch(
+			ts.addLeaf(10, 10),
+			ts.addLeaf(20, 20),
+		)
+
+		t.Run("left", func(t *testing.T) {
+			new_index := ts.insertIntoBranch(ts.root, 0, 30, 30)
+			leaves := ts.getLeaves(new_index)
+			if leaves[0].x != 30 || leaves[0].y != 30 ||
+				leaves[1].x != 10 || leaves[1].y != 10 ||
+				leaves[2].x != 20 || leaves[2].y != 20 {
+				t.Errorf(
+					"got: %d:%d, %d:%d, %d:%d expected 30:30, 10:10, 20:20",
+					leaves[0].x, leaves[0].y,
+					leaves[1].x, leaves[1].y,
+					leaves[2].x, leaves[2].y,
+				)
+			}
+		})
+
+		t.Run("right", func(t *testing.T) {
+			new_index := ts.insertIntoBranch(ts.root, 10, 30, 30)
+			leaves := ts.getLeaves(new_index)
+			if leaves[0].x != 10 || leaves[0].y != 10 ||
+				leaves[1].x != 30 || leaves[1].y != 30 ||
+				leaves[2].x != 20 || leaves[2].y != 20 {
+				t.Errorf(
+					"got: %d:%d, %d:%d, %d:%d expected 10:10, 30:30, 20:20",
+					leaves[0].x, leaves[0].y,
+					leaves[1].x, leaves[1].y,
+					leaves[2].x, leaves[2].y,
+				)
+			}
+		})
+	})
+
+	t.Run("branch with one leaf and one branch", func(t *testing.T) {
+		ts := newTreeSlab()
+		ts.root = ts.addBranch(
+			ts.addLeaf(10, 10),
+			ts.addBranch(
+				ts.addLeaf(20, 20),
+				ts.addLeaf(30, 30),
+			),
+		)
+		new_index := ts.insertIntoBranch(ts.root, 10, 40, 40)
+		leaves := ts.getLeaves(new_index)
+		if leaves[0].x != 10 || leaves[0].y != 10 ||
+			leaves[1].x != 40 || leaves[1].y != 40 ||
+			leaves[2].x != 20 || leaves[2].y != 20 ||
+			leaves[3].x != 30 || leaves[3].y != 30 {
+			t.Errorf(
+				"got: %d:%d, %d:%d, %d:%d, %d:%d expected 10:10, 40:40, 20:20, 30:30",
+				leaves[0].x, leaves[0].y,
+				leaves[1].x, leaves[1].y,
+				leaves[2].x, leaves[2].y,
+				leaves[3].x, leaves[3].y,
+			)
+		}
+	})
+}

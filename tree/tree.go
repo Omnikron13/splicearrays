@@ -1,0 +1,91 @@
+package tree
+
+import (
+	"unsafe"
+)
+
+// NODE_BYTE_SIZE is the size of a node in bytes.
+const NODE_BYTE_SIZE = unsafe.Sizeof(node{})
+
+// SLAB_CHUNK_SIZE is the number of bytes new tree_slabs are initialized to hold by default, as well as ideally
+// the number of new bytes to allocate at a time when the slab is full.
+const SLAB_CHUNK_SIZE = 4096
+
+// INITIAL_SLAB_CAPACITY is the number of nodes new tree_slabs are initialized to hold by default.
+const INITIAL_SLAB_CAPACITY = SLAB_CHUNK_SIZE / int(NODE_BYTE_SIZE)
+
+// A treeSlab is a slab-allocated array of nodes.
+// It is used to store a tree structure which doesn't suffer from the fragmentation issues that a
+// pointer-based tree would.
+// In theory this should improve performance issues related to virtual memory management, cache misses, and
+// garbage collection.
+type treeSlab struct {
+	nodes []node
+	root  uint32
+}
+
+// newTreeSlab creates a new treeSlab with an initial capacity of INITIAL_SLAB_CAPACITY.
+func newTreeSlab() treeSlab {
+	return treeSlab{nodes: make([]node, 0, INITIAL_SLAB_CAPACITY)}
+}
+
+// byteCount returns the total number of bytes contained in the (sub)tree rooted at the given node index.
+// It also returns how many of those bytes are in the left subtree.
+func (ts *treeSlab) byteCount(i uint32) (uint32, uint32) {
+	if ts.nodes[i].leaf {
+		return ts.nodes[i].y, ts.nodes[i].y
+	}
+	left, _ := ts.byteCount(ts.nodes[i].x)
+	right, _ := ts.byteCount(ts.nodes[i].y)
+	return left + right, left
+}
+
+// addNode adds a node to the treeSlab.
+// It returns the index of the added node.
+func (ts *treeSlab) addNode(leaf bool, x, y uint32) uint32 {
+	ts.nodes = append(ts.nodes, node{leaf, x, y})
+	return uint32(len(ts.nodes) - 1)
+}
+
+// addBranch adds a branch node to the treeSlab, as a convenience method.
+// It returns the index of the added node.
+func (ts *treeSlab) addBranch(x, y uint32) uint32 {
+	return ts.addNode(false, x, y)
+}
+
+// addLeaf adds a leaf node to the treeSlab, as a convenience method.
+// It returns the index of the added node.
+func (ts *treeSlab) addLeaf(x, y uint32) uint32 {
+	return ts.addNode(true, x, y)
+}
+
+// insertIntoLeaf inserts a new leaf node into the treeSlab, splitting the leaf node at the given index and returning
+// the index of a new branch node that can be used to replace the leaf node.
+func (ts *treeSlab) insertIntoLeaf(leaf_index, insert_index, x, y uint32) uint32 {
+	l, r := ts.nodes[leaf_index].split(insert_index)
+	if l == nil {
+		return ts.addBranch(ts.addLeaf(x, y), leaf_index)
+	}
+	if r == nil {
+		return ts.addBranch(leaf_index, ts.addLeaf(x, y))
+	}
+	return ts.addBranch(ts.addLeaf(l.x, l.y), ts.addBranch(ts.addLeaf(x, y), ts.addLeaf(r.x, r.y)))
+}
+
+// getLeaves returns a slice of all the leaf node indexes in the treeSlab.
+func (ts *treeSlab) getLeaves() []node {
+	leaves := make([]node, 0, len(ts.nodes))
+
+	var walkTree func(uint32)
+	walkTree = func(i uint32) {
+		if ts.nodes[i].leaf {
+			leaves = append(leaves, ts.nodes[i])
+		} else {
+			walkTree(ts.nodes[i].x)
+			walkTree(ts.nodes[i].y)
+		}
+	}
+	walkTree(ts.root)
+
+	return leaves
+}

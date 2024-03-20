@@ -197,6 +197,7 @@ func TestGetLeaves(t *testing.T) {
 }
 
 func TestInsertIntoLeaf(t *testing.T) {
+	// TODO: tidy the fail conditions similar to TestInsertIntoBranch
 	ts := newTreeSlab()
 	leaf := ts.addLeaf(0, 10)
 

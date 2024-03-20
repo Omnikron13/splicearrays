@@ -35,3 +35,21 @@ func (n *node) split(index uint32) (*node, *node) {
 		return &node{leaf: true, x: n.x, y: index}, &node{leaf: true, x: n.x + index, y: n.y - index}
 	}
 }
+
+// remove removes a range of indices from a leaf node.
+// Returns either two leaves if both sides of the range are not empty, one leaf & nil if one side is empty,
+// or nil, nil if the entire range of the leaf is removed.
+func (n *node) remove(start, length uint32) (*node, *node) {
+	// TODO: deal with branch nodes
+	// TODO: handle invalid inputs (start out of bounds, start+length out of bounds, split at 0 or n.y)
+	if length == n.y {
+		return nil, nil
+	}
+	if start == 0 {
+		return &node{leaf: true, x: n.x + length, y: n.y - length}, nil
+	}
+	if start+length == n.y {
+		return &node{leaf: true, x: n.x, y: n.y - length}, nil
+	}
+	return &node{leaf: true, y: start}, &node{leaf: true, x: start + length, y: n.y - (start + length)}
+}

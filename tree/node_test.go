@@ -43,3 +43,57 @@ func TestNodeToString(t *testing.T) {
 		}
 	})
 }
+
+func TestRemove(t *testing.T) {
+	t.Run("all", func(t *testing.T) {
+		n := node{leaf: true, x: 0, y: 10}
+		l, r := n.remove(0, 10)
+		if l != nil || r != nil {
+			t.Fail()
+		}
+	})
+
+	t.Run("start", func(t *testing.T) {
+		n := node{leaf: true, x: 0, y: 10}
+		l, r := n.remove(0, 5)
+		if r != nil {
+			t.Fail()
+		}
+		if l.String() != "leaf {index: 5 length: 5}" {
+			t.Errorf("Expected leaf {index: 5 length: 5}, got %s", l.String())
+		}
+	})
+
+	t.Run("end", func(t *testing.T) {
+		n := node{leaf: true, x: 0, y: 10}
+		l, r := n.remove(5, 5)
+		if r != nil {
+			t.Fail()
+		}
+		if l.String() != "leaf {index: 0 length: 5}" {
+			t.Errorf("Expected leaf {index: 0 length: 5}, got %s", l.String())
+		}
+	})
+
+	t.Run("remove middle", func(t *testing.T) {
+		n := node{leaf: true, x: 0, y: 10}
+		l, r := n.remove(3, 4)
+		if l.String() != "leaf {index: 0 length: 3}" {
+			t.Errorf("Expected leaf {index: 0 length: 5}, got %s", l.String())
+		}
+		if r.String() != "leaf {index: 7 length: 3}" {
+			t.Errorf("Expected leaf {index: 0 length: 5}, got %s", r.String())
+		}
+	})
+
+	t.Run("split", func(t *testing.T) {
+		n := node{leaf: true, x: 0, y: 10}
+		l, r := n.remove(5, 0)
+		if l.String() != "leaf {index: 0 length: 5}" {
+			t.Errorf("Expected leaf {index: 0 length: 5}, got %s", l.String())
+		}
+		if r.String() != "leaf {index: 5 length: 5}" {
+			t.Errorf("Expected leaf {index: 0 length: 5}, got %s", r.String())
+		}
+	})
+}

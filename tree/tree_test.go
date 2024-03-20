@@ -356,3 +356,122 @@ func TestRemoveFromLeaf(t *testing.T) {
 		}
 	})
 }
+
+func TestRemoveFromBranch(t *testing.T) {
+	ts := newTreeSlab()
+	i := ts.addBranch(
+		ts.addLeaf(0, 10),
+		ts.addLeaf(10, 10),
+	)
+
+	t.Run("all", func(t *testing.T) {
+		n := ts.removeFromBranch(i, 0, 20)
+		if n != nil {
+			t.Error("Expected nil, got", n)
+		}
+	})
+
+	t.Run("all left", func(t *testing.T) {
+		n := ts.removeFromBranch(i, 0, 10)
+		expected := "leaf {index: 10 length: 10}"
+		actual := ts.nodes[*n].String()
+		if actual != expected {
+			t.Errorf("Expected %s, got %s", expected, actual)
+		}
+	})
+
+	t.Run("some left", func(t *testing.T) {
+		n := ts.removeFromBranch(i, 0, 5)
+		if n == nil {
+			t.Error("Expected non-nil, got nil")
+		}
+		expected := "leaf {index: 5 length: 5}"
+		actual := ts.nodes[ts.nodes[*n].x].String()
+		if actual != expected {
+			t.Errorf("Expected left %s, got %s", expected, actual)
+		}
+		expected = "leaf {index: 10 length: 10}"
+		actual = ts.nodes[ts.nodes[*n].y].String()
+		if actual != expected {
+			t.Errorf("Expected right %s, got %s", expected, actual)
+		}
+	})
+
+	t.Run("middle left", func(t *testing.T) {
+		n := ts.removeFromBranch(i, 3, 4)
+		leaves := ts.getLeaves(*n)
+		if leaves[0].String() != "leaf {index: 0 length: 3}" ||
+			leaves[1].String() != "leaf {index: 7 length: 3}" ||
+			leaves[2].String() != "leaf {index: 10 length: 10}" {
+			t.Fail()
+		}
+	})
+
+	t.Run("first three quarters", func(t *testing.T) {
+		n := ts.removeFromBranch(i, 0, 15)
+		expected := "leaf {index: 15 length: 5}"
+		actual := ts.nodes[*n].String()
+		if ts.nodes[*n].String() != expected {
+			t.Errorf("Expected %s, got %s", expected, actual)
+		}
+	})
+
+	t.Run("all right", func(t *testing.T) {
+		n := ts.removeFromBranch(i, 10, 10)
+		expected := "leaf {index: 0 length: 10}"
+		actual := ts.nodes[*n].String()
+		if actual != expected {
+			t.Errorf("Expected %s, got %s", expected, actual)
+		}
+	})
+
+	t.Run("some right", func(t *testing.T) {
+		n := ts.removeFromBranch(i, 15, 5)
+		if n == nil {
+			t.Error("Expected non-nil, got nil")
+		}
+		expected := "leaf {index: 0 length: 10}"
+		actual := ts.nodes[ts.nodes[*n].x].String()
+		if actual != expected {
+			t.Errorf("Expected left %s, got %s", expected, actual)
+		}
+		expected = "leaf {index: 10 length: 5}"
+		actual = ts.nodes[ts.nodes[*n].y].String()
+		if actual != expected {
+			t.Errorf("Expected right %s, got %s", expected, actual)
+		}
+	})
+
+	t.Run("middle right", func(t *testing.T) {
+		n := ts.removeFromBranch(i, 13, 4)
+		leaves := ts.getLeaves(*n)
+		if leaves[0].String() != "leaf {index: 0 length: 10}" ||
+			leaves[1].String() != "leaf {index: 10 length: 3}" ||
+			leaves[2].String() != "leaf {index: 17 length: 3}" {
+			t.Fail()
+		}
+	})
+
+	t.Run("last three quarters", func(t *testing.T) {
+		n := ts.removeFromBranch(i, 5, 15)
+		expected := "leaf {index: 0 length: 5}"
+		actual := ts.nodes[*n].String()
+		if ts.nodes[*n].String() != expected {
+			t.Errorf("Expected %s, got %s", expected, actual)
+		}
+	})
+
+	t.Run("middle half", func(t *testing.T) {
+		n := ts.removeFromBranch(i, 5, 10)
+		expected := "leaf {index: 0 length: 5}"
+		actual := ts.nodes[ts.nodes[*n].x].String()
+		if actual != expected {
+			t.Errorf("Expected left %s, got %s", expected, actual)
+		}
+		expected = "leaf {index: 15 length: 5}"
+		actual = ts.nodes[ts.nodes[*n].y].String()
+		if actual != expected {
+			t.Errorf("Expected right %s, got %s", expected, actual)
+		}
+	})
+}

@@ -117,6 +117,61 @@ func (ts *treeSlab) removeFromLeaf(index, start, length uint32) *uint32 {
 	return &i
 }
 
+// removeFromBranch remove a range of indices from a branch node in the treeSlab, returning a new leaf or branch node
+// index, or nil if the branch node is entirely removed.
+func (ts *treeSlab) removeFromBranch(index, start, length uint32) *uint32 {
+	// TODO: handle invalid inputs
+	if length == 0 {
+		return &index
+	}
+
+	count, left := ts.byteCount(index)
+
+	if start == 0 {
+		// Entire range of branch removed
+		if length == count {
+			return nil
+		}
+		// Entire left side removed
+		if length >= left {
+			return ts.removeFromNode(ts.nodes[index].y, 0, length-left)
+		}
+	}
+
+	// Entire right side removed
+	if start <= left && start+length == count {
+		return ts.removeFromNode(ts.nodes[index].x, start, length-(count-left))
+	}
+
+	// Contained entirely within left side
+	if start+length <= left {
+		i := ts.removeFromNode(ts.nodes[index].x, start, length)
+		bi := ts.addBranch(*i, ts.nodes[index].y)
+		return &bi
+	}
+
+	// Contained entirely within right side
+	if start >= left {
+		i := ts.removeFromNode(ts.nodes[index].y, start-left, length)
+		bi := ts.addBranch(ts.nodes[index].x, *i)
+		return &bi
+	}
+
+	li := ts.removeFromNode(ts.nodes[index].x, start, left-start)
+	ri := ts.removeFromNode(ts.nodes[index].y, 0, length-(left-start))
+	bi := ts.addBranch(*li, *ri)
+	return &bi
+}
+
+// removeFromNode remove a range of indices from a node in the treeSlab, returning a new leaf or branch node index,
+// or nil if the leaf node is entirely removed.
+func (ts *treeSlab) removeFromNode(index, start, length uint32) *uint32 {
+	if ts.nodes[index].leaf {
+		return ts.removeFromLeaf(index, start, length)
+	}
+	return ts.removeFromBranch(index, start, length)
+}
+
 // getLeaves returns a slice of all the leaf node indexes in the treeSlab (sub)tree starting at a given index.
 func (ts *treeSlab) getLeaves(index uint32) []node {
 	// TODO: return pointers to nodes instead of copying them?

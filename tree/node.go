@@ -10,6 +10,22 @@ type node struct {
 	x, y uint32
 }
 
+// Left returns the left child node index of a branch node. If the node is a leaf, it returns 0, and an error.
+func (n *node) Left() (uint32, error) {
+	if n.leaf {
+		return 0, fmt.Errorf("node is a leaf")
+	}
+	return n.x, nil
+}
+
+// Right returns the right child node index of a branch node. If the node is a leaf, it returns 0, and an error.
+func (n *node) Right() (uint32, error) {
+	if n.leaf {
+		return 0, fmt.Errorf("node is a leaf")
+	}
+	return n.y, nil
+}
+
 // String() returns a string representation of the node.
 func (n *node) String() string {
 	if n.leaf {

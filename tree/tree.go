@@ -103,6 +103,7 @@ func (ts *treeSlab) insertIntoNode(node_index, insert_index, x, y uint32) uint32
 
 // getLeaves returns a slice of all the leaf node indexes in the treeSlab (sub)tree starting at a given index.
 func (ts *treeSlab) getLeaves(index uint32) []node {
+	// TODO: return pointers to nodes instead of copying them?
 	// TODO: short circuit out for 0 & 1 total nodes
 	leaves := make([]node, 0, len(ts.nodes)/2+1)
 

@@ -51,5 +51,5 @@ func (n *node) remove(start, length uint32) (*node, *node) {
 	if start+length == n.y {
 		return &node{leaf: true, x: n.x, y: n.y - length}, nil
 	}
-	return &node{leaf: true, y: start}, &node{leaf: true, x: start + length, y: n.y - (start + length)}
+	return &node{leaf: true, x: n.x, y: start}, &node{leaf: true, x: n.x + start + length, y: n.y - (start + length)}
 }

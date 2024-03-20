@@ -76,8 +76,8 @@ func (ts *treeSlab) insertIntoLeaf(leaf_index, insert_index, x, y uint32) uint32
 	return ts.addBranch(ts.addLeaf(l.x, l.y), ts.addBranch(ts.addLeaf(x, y), ts.addLeaf(r.x, r.y)))
 }
 
-// getLeaves returns a slice of all the leaf node indexes in the treeSlab.
-func (ts *treeSlab) getLeaves() []node {
+// getLeaves returns a slice of all the leaf node indexes in the treeSlab (sub)tree starting at a given index.
+func (ts *treeSlab) getLeaves(index uint32) []node {
 	leaves := make([]node, 0, len(ts.nodes))
 
 	var walkTree func(uint32)
@@ -89,7 +89,7 @@ func (ts *treeSlab) getLeaves() []node {
 			walkTree(ts.nodes[i].y)
 		}
 	}
-	walkTree(ts.root)
+	walkTree(index)
 
 	return leaves
 }

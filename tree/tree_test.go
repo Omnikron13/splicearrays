@@ -156,7 +156,7 @@ func TestAddBranch(t *testing.T) {
 func TestGetLeaves(t *testing.T) {
 	ts := newTreeSlab()
 	li1 := ts.addLeaf(0, 0)
-	leaves := ts.getLeaves()
+	leaves := ts.getLeaves(li1)
 	if len(leaves) != 1 {
 		t.Fail()
 	}
@@ -172,7 +172,7 @@ func TestGetLeaves(t *testing.T) {
 	li2 := ts.addLeaf(1, 1)
 	bi1 := ts.addBranch(li1, li2)
 	ts.root = bi1
-	leaves = ts.getLeaves()
+	leaves = ts.getLeaves(bi1)
 	if len(leaves) != 2 {
 		t.Fail()
 	}

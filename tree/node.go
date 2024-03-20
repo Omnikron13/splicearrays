@@ -26,6 +26,24 @@ func (n *node) Right() (uint32, error) {
 	return n.y, nil
 }
 
+// Start returns the starting index for the sequence a leaf node.
+// It will return 0 and an error for branch nodes, where there isn't a meaningful response.
+func (n *node) Start() (uint32, error) {
+	if n.leaf {
+		return n.x, nil
+	}
+	return 0, fmt.Errorf("node is a branch")
+}
+
+// Length returns the length of the sequence stored by a leaf node.
+// It will return 0 and an error for branch nodes, where there isn't a meaningful response.
+func (n *node) Length() (uint32, error) {
+	if n.leaf {
+		return n.y, nil
+	}
+	return 0, fmt.Errorf("node is a branch")
+}
+
 // String() returns a string representation of the node.
 func (n *node) String() string {
 	if n.leaf {

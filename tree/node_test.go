@@ -75,7 +75,7 @@ func TestRemove(t *testing.T) {
 		}
 	})
 
-	t.Run("remove middle", func(t *testing.T) {
+	t.Run("middle", func(t *testing.T) {
 		n := node{leaf: true, x: 0, y: 10}
 		l, r := n.remove(3, 4)
 		if l.String() != "leaf {index: 0 length: 3}" {

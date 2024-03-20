@@ -59,8 +59,12 @@ func (ts *treeSlab) addLeaf(x, y uint32) uint32 {
 	return ts.addNode(true, x, y)
 }
 
-// insertIntoLeaf inserts a new leaf node into the treeSlab, splitting the leaf node at the given index and returning
-// the index of a new branch node that can be used to replace the leaf node.
+// insertIntoLeaf inserts a new leaf node into the treeSlab at given leaf node index, returning a new branch node index.
+// If the insert_index is 0 the branch will have the new leaf on the left and old leaf on the right.
+// If the insert_index is the length of the leaf node the branch will have the old leaf on the left and the new leaf on the right.
+// If the insert_index is the length of the leaf node, a new branch node is returned with the old leaf on the left and the new leaf on the right.
+// Otherwise the branch will take the form branch{split left, branch{new, split right}}.
+// The index of the new branch node can be used to replace the leaf node.
 func (ts *treeSlab) insertIntoLeaf(leaf_index, insert_index, x, y uint32) uint32 {
 	l, r := ts.nodes[leaf_index].split(insert_index)
 	if l == nil {

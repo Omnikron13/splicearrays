@@ -49,14 +49,14 @@ func (ts *treeSlab) addNode(leaf bool, x, y uint32) uint32 {
 
 // addBranch adds a branch node to the treeSlab, as a convenience method.
 // It returns the index of the added node.
-func (ts *treeSlab) addBranch(x, y uint32) uint32 {
-	return ts.addNode(false, x, y)
+func (ts *treeSlab) addBranch(left, right uint32) uint32 {
+	return ts.addNode(false, left, right)
 }
 
 // addLeaf adds a leaf node to the treeSlab, as a convenience method.
 // It returns the index of the added node.
-func (ts *treeSlab) addLeaf(x, y uint32) uint32 {
-	return ts.addNode(true, x, y)
+func (ts *treeSlab) addLeaf(index, length uint32) uint32 {
+	return ts.addNode(true, index, length)
 }
 
 // insertIntoLeaf inserts a new leaf node into the treeSlab at given leaf node index, returning a new branch node index.

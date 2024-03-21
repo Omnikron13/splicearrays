@@ -48,63 +48,63 @@ jobs:
     - name: Bench
       run: go test -v -bench=./...
 
-  coverage:
-    - name: Coveralls GitHub Action
-      uses: coverallsapp/github-action@v2.2.3
-      github_token: ${{ github.token }}
-
-    - name: actions-goveralls
-      # You may pin to the exact commit or the version.
-      # uses: shogo82148/actions-goveralls@7b1bd2871942af030d707d6574e5f684f9891fb2
-      uses: shogo82148/actions-goveralls@v1.8.0
-      with:
-      # Coveralls uses this token to verify the posted coverage data on the repo and create a new check based on the results.
-      github-token: # default is ${{ github.token }}
-      # a path to your cover profile.
-      path-to-profile: # optional, default is
-      # Set to true if you are running parallel jobs, then use "parallel_finished: true" for the last action.
-      parallel: # optional
-      # Set to true for the last action when using "parallel: true".
-      parallel-finished: # optional
-      # job number (DEPRECATED)
-      job-number: # optional, default is ${{ strategy.job-index }}
-      # Job flag name, e.g. "Unit", "Functional", or "Integration". Will be shown in the Coveralls UI.
-      flag-name: # optional, default is ${{ strategy.job-index }}
-      # working directory
-      working-directory: # optional, default is .
-      # Comma separated files to ignore
-      ignore: # optional, default is
-      # Shallow coveralls internal server errors
-      shallow: # optional
-
-    - name: Go Coverage
-      # You may pin to the exact commit or the version.
-      # uses: gwatts/go-coverage-action@cf5795fd4027fa3163339b4c284ab50532e65d11
-      uses: gwatts/go-coverage-action@v1.3.0
-      with:
-      # github token
-      token: # optional, default is ${{ github.token }}
-      # URL of final uploaded report.  e.g. https://reports.example.com/{{ $github.sha }}/cover.html
-      report-url: # optional
-      # Working directory.  defaults to project root
-      working-directory: # optional, default is
-      # File or pathname for the resulting html coverage report
-      report-filename: # optional, default is go-coverage.html
-      # Parameter to pass to go tests -covermode argument.  Either count, set or atomic
-      cover-mode: # optional, default is count
-      # Parameter to pass to go tests -coverpkg argument. Leave empty to omit flag
-      cover-pkg: # optional, default is
-      # Build arguments to pass to go test
-      test-args: # optional, default is []
-      # Fail the build if the coverage drops below supplied percentage
-      coverage-threshold: # optional, default is 0
-      # Fail the build if coverage drops below coverage-threshold.  One of "always", "never" or "only_pull_requests"
-      fail-coverage: # optional, default is only_pull_requests
-      # Adds a comment to the PR with coverage information if true. If false will only add an action summary report
-      add-comment: # optional, default is true
-      # One or more regular expressions matching filenames to exclude from coverage statistics (e.g. for generated Go files)
-      ignore-pattern: # optional, default is
-
-  code_review:
-    - name: ChatGPT CodeReviewer
-      uses: anc95/ChatGPT-CodeReview@v1.0.13
+        #  coverage:
+        #    - name: Coveralls GitHub Action
+        #      uses: coverallsapp/github-action@v2.2.3
+        #      github_token: ${{ github.token }}
+        #
+        #    - name: actions-goveralls
+        #      # You may pin to the exact commit or the version.
+        #      # uses: shogo82148/actions-goveralls@7b1bd2871942af030d707d6574e5f684f9891fb2
+        #      uses: shogo82148/actions-goveralls@v1.8.0
+        #      with:
+        #      # Coveralls uses this token to verify the posted coverage data on the repo and create a new check based on the results.
+        #      github-token: # default is ${{ github.token }}
+        #      # a path to your cover profile.
+        #      path-to-profile: # optional, default is
+        #      # Set to true if you are running parallel jobs, then use "parallel_finished: true" for the last action.
+        #      parallel: # optional
+        #      # Set to true for the last action when using "parallel: true".
+        #      parallel-finished: # optional
+        #      # job number (DEPRECATED)
+        #      job-number: # optional, default is ${{ strategy.job-index }}
+        #      # Job flag name, e.g. "Unit", "Functional", or "Integration". Will be shown in the Coveralls UI.
+        #      flag-name: # optional, default is ${{ strategy.job-index }}
+        #      # working directory
+        #      working-directory: # optional, default is .
+        #      # Comma separated files to ignore
+        #      ignore: # optional, default is
+        #      # Shallow coveralls internal server errors
+        #      shallow: # optional
+        #
+        #    - name: Go Coverage
+        #      # You may pin to the exact commit or the version.
+        #      # uses: gwatts/go-coverage-action@cf5795fd4027fa3163339b4c284ab50532e65d11
+        #      uses: gwatts/go-coverage-action@v1.3.0
+        #      with:
+        #      # github token
+        #      token: # optional, default is ${{ github.token }}
+        #      # URL of final uploaded report.  e.g. https://reports.example.com/{{ $github.sha }}/cover.html
+        #      report-url: # optional
+        #      # Working directory.  defaults to project root
+        #      working-directory: # optional, default is
+        #      # File or pathname for the resulting html coverage report
+        #      report-filename: # optional, default is go-coverage.html
+        #      # Parameter to pass to go tests -covermode argument.  Either count, set or atomic
+        #      cover-mode: # optional, default is count
+        #      # Parameter to pass to go tests -coverpkg argument. Leave empty to omit flag
+        #      cover-pkg: # optional, default is
+        #      # Build arguments to pass to go test
+        #      test-args: # optional, default is []
+        #      # Fail the build if the coverage drops below supplied percentage
+        #      coverage-threshold: # optional, default is 0
+        #      # Fail the build if coverage drops below coverage-threshold.  One of "always", "never" or "only_pull_requests"
+        #      fail-coverage: # optional, default is only_pull_requests
+        #      # Adds a comment to the PR with coverage information if true. If false will only add an action summary report
+        #      add-comment: # optional, default is true
+        #      # One or more regular expressions matching filenames to exclude from coverage statistics (e.g. for generated Go files)
+        #      ignore-pattern: # optional, default is
+        #
+        #  code_review:
+        #    - name: ChatGPT CodeReviewer
+        #      uses: anc95/ChatGPT-CodeReview@v1.0.13

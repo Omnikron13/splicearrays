@@ -79,7 +79,7 @@ func (ts *treeSlab) insertIntoLeaf(leaf_index, insert_index, leaf uint32) uint32
 // The new leaf node is inserted into the left or right subtree of the branch node, depending on the insert_index.
 // The index of the new branch node can be used to replace the old branch node.
 func (ts *treeSlab) insertIntoBranch(branch_index, insert_index, leaf uint32) uint32 {
-	_, left := ts.byteCount(ts.nodes[branch_index].x)
+	_, left := ts.ItemCount(branch_index)
 	if insert_index < left {
 		return ts.addBranch(
 			ts.insertIntoNode(ts.nodes[branch_index].x, insert_index, leaf),

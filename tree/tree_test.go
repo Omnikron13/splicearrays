@@ -485,3 +485,29 @@ func TestWalkTree(t *testing.T) {
 		}
 	})
 }
+
+func TestLeafIter(t *testing.T) {
+	ts := NewTreeSlab()
+	i := ts.addBranch(
+		ts.AddLeaf(0, 10),
+		ts.addBranch(
+			ts.addBranch(
+				ts.AddLeaf(10, 10),
+				ts.addBranch(
+					ts.AddLeaf(20, 10),
+					ts.AddLeaf(30, 10),
+				),
+			),
+			ts.AddLeaf(40, 10),
+		),
+	)
+
+	x := uint32(0)
+	for n := range ts.LeafIter(i) {
+		l, _ := n.Length()
+		x += l
+	}
+	if x != 50 {
+		t.Fail()
+	}
+}

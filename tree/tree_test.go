@@ -190,125 +190,72 @@ func TestGetLeaves(t *testing.T) {
 	}
 }
 
-func TestInsertIntoLeaf(t *testing.T) {
-	// TODO: tidy the fail conditions similar to TestInsertIntoBranch
-	ts := NewTreeSlab()
-	leaf := ts.AddLeaf(0, 10)
+func TestInsert(t *testing.T) {
+	insert := func(setup func() (TreeSlab, uint32)) func(*testing.T, string, uint32, [][2]uint32) {
+		return func(t *testing.T, name string, index uint32, expected [][2]uint32) {
+			ts, ri := setup()
+			root := ts.insert(ri, index, ts.AddLeaf(10, 10))
+			i := 0
+			for n := range ts.LeafIter(root) {
+				if n.x != expected[i][0] || n.y != expected[i][1] {
+					t.Errorf("leaf %d expected %d:%d, got %d:%d", i, expected[i][0], expected[i][1], n.x, n.y)
+				}
+				i++
+			}
+		}
+	}
+	insertLeaf := insert(func() (TreeSlab, uint32) {
+		ts := NewTreeSlab()
+		rootIndex := ts.AddLeaf(0, 10)
+		return ts, rootIndex
+	})
+	insertBranch := insert(func() (TreeSlab, uint32) {
+		ts := NewTreeSlab()
+		rootIndex := ts.addBranch(ts.AddLeaf(0, 5), ts.AddLeaf(5, 5))
+		return ts, rootIndex
+	})
 
-	t.Run("InsertString into leaf at 0", func(t *testing.T) {
-		i := ts.insertIntoLeaf(leaf, 0, ts.AddLeaf(10, 2))
-		node := ts.nodes[i]
-		if ts.nodes[i].String() != "branch {left: 1 right: 0}" {
-			t.Fail()
-		}
-		if ts.nodes[node.x].String() != "leaf {index: 10 length: 2}" {
-			t.Fail()
-		}
-		if ts.nodes[node.y].String() != "leaf {index: 0 length: 10}" {
-			t.Fail()
+	t.Run("leaf", func(t *testing.T) {
+		tests :=
+			[]struct {
+				name     string
+				index    uint32
+				expected [][2]uint32
+			}{
+				{"start", 0, [][2]uint32{{10, 10}, {0, 10}}},
+				{"end", 10, [][2]uint32{{0, 10}, {10, 10}}},
+				{"mid", 5, [][2]uint32{{0, 5}, {10, 10}, {5, 5}}},
+			}
+
+		for _, test := range tests {
+			t.Run(test.name, func(t *testing.T) {
+				insertLeaf(t, test.name, test.index, test.expected)
+			})
 		}
 	})
 
-	t.Run("InsertString into leaf at end", func(t *testing.T) {
-		i := ts.insertIntoLeaf(leaf, 10, ts.AddLeaf(10, 2))
-		node := ts.nodes[i]
-		if ts.nodes[i].String() != "branch {left: 0 right: 3}" {
-			t.Fatal("got:", ts.nodes[i].String(), "expected:", "branch {left: 0 right: 3}")
-		}
-		if ts.nodes[node.x].String() != "leaf {index: 0 length: 10}" {
-			t.Fatal("got:", ts.nodes[node.x].String(), "expected:", "leaf {index: 0 length: 10}")
-		}
-		if ts.nodes[node.y].String() != "leaf {index: 10 length: 2}" {
-			t.Fatal("got:", ts.nodes[node.y].String(), "expected:", "leaf {index: 10 length: 2}")
-		}
-	})
+	t.Run("branch", func(t *testing.T) {
+		tests :=
+			[]struct {
+				name     string
+				index    uint32
+				expected [][2]uint32
+			}{
+				{"start", 0, [][2]uint32{{10, 10}, {0, 5}, {5, 5}}},
+				{"end", 10, [][2]uint32{{0, 5}, {5, 5}, {10, 10}}},
+				{"mid", 5, [][2]uint32{{0, 5}, {10, 10}, {5, 5}}},
+				{"mid left", 2, [][2]uint32{{0, 2}, {10, 10}, {2, 3}, {5, 5}}},
+				{"mid right", 7, [][2]uint32{{0, 5}, {5, 2}, {10, 10}, {7, 3}}},
+			}
 
-	t.Run("InsertString into leaf at 2", func(t *testing.T) {
-		i := ts.insertIntoLeaf(leaf, 2, ts.AddLeaf(10, 2))
-		node := ts.nodes[i]
-		if ts.nodes[i].String() != "branch {left: 6 right: 8}" {
-			t.Error("got:", ts.nodes[i].String(), "expected:", "branch {left: 6 right: 8}")
-		}
-		if ts.nodes[node.x].String() != "leaf {index: 0 length: 2}" {
-			t.Error("got:", ts.nodes[node.x].String(), "expected:", "leaf {index: 0 length: 2}")
-		}
-		if ts.nodes[node.y].String() != "branch {left: 5 right: 7}" {
-			t.Error("got:", ts.nodes[node.y].String(), "expected:", "branch {left: 5 right: 7}")
-		}
-		node = ts.nodes[node.y]
-		if ts.nodes[node.x].String() != "leaf {index: 10 length: 2}" {
-			t.Error("got:", ts.nodes[node.x].String(), "expected:", "leaf {index: 10 length: 2}")
-		}
-		if ts.nodes[node.y].String() != "leaf {index: 2 length: 8}" {
-			t.Error("got:", ts.nodes[node.y].String(), "expected:", "leaf {index: 2 length: 8}")
+		for _, test := range tests {
+			t.Run(test.name, func(t *testing.T) {
+				insertBranch(t, test.name, test.index, test.expected)
+			})
 		}
 	})
 }
 
-func TestInsertIntoBranch(t *testing.T) {
-	t.Run("branch with 2 leaves", func(t *testing.T) {
-		ts := NewTreeSlab()
-		i := ts.addBranch(
-			ts.AddLeaf(10, 10),
-			ts.AddLeaf(20, 20),
-		)
-
-		t.Run("left", func(t *testing.T) {
-			new_index := ts.insertIntoBranch(i, 0, ts.AddLeaf(30, 30))
-			leaves := ts.GetLeaves(new_index)
-			if leaves[0].x != 30 || leaves[0].y != 30 ||
-				leaves[1].x != 10 || leaves[1].y != 10 ||
-				leaves[2].x != 20 || leaves[2].y != 20 {
-				t.Errorf(
-					"got: %d:%d, %d:%d, %d:%d expected 30:30, 10:10, 20:20",
-					leaves[0].x, leaves[0].y,
-					leaves[1].x, leaves[1].y,
-					leaves[2].x, leaves[2].y,
-				)
-			}
-		})
-
-		t.Run("right", func(t *testing.T) {
-			new_index := ts.insertIntoBranch(i, 10, ts.AddLeaf(30, 30))
-			leaves := ts.GetLeaves(new_index)
-			if leaves[0].x != 10 || leaves[0].y != 10 ||
-				leaves[1].x != 30 || leaves[1].y != 30 ||
-				leaves[2].x != 20 || leaves[2].y != 20 {
-				t.Errorf(
-					"got: %d:%d, %d:%d, %d:%d expected 10:10, 30:30, 20:20",
-					leaves[0].x, leaves[0].y,
-					leaves[1].x, leaves[1].y,
-					leaves[2].x, leaves[2].y,
-				)
-			}
-		})
-	})
-
-	t.Run("branch with one leaf and one branch", func(t *testing.T) {
-		ts := NewTreeSlab()
-		i := ts.addBranch(
-			ts.AddLeaf(10, 10),
-			ts.addBranch(
-				ts.AddLeaf(20, 20),
-				ts.AddLeaf(30, 30),
-			),
-		)
-		new_index := ts.insertIntoBranch(i, 10, ts.AddLeaf(40, 40))
-		leaves := ts.GetLeaves(new_index)
-		if leaves[0].x != 10 || leaves[0].y != 10 ||
-			leaves[1].x != 40 || leaves[1].y != 40 ||
-			leaves[2].x != 20 || leaves[2].y != 20 ||
-			leaves[3].x != 30 || leaves[3].y != 30 {
-			t.Errorf(
-				"got: %d:%d, %d:%d, %d:%d, %d:%d expected 10:10, 40:40, 20:20, 30:30",
-				leaves[0].x, leaves[0].y,
-				leaves[1].x, leaves[1].y,
-				leaves[2].x, leaves[2].y,
-				leaves[3].x, leaves[3].y,
-			)
-		}
-	})
-}
 func TestRemoveFromLeaf(t *testing.T) {
 	t.Run("all", func(t *testing.T) {
 		ts := NewTreeSlab()

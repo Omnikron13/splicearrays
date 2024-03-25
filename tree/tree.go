@@ -67,65 +67,40 @@ func (ts *TreeSlab) AddLeaf(index, length uint32) uint32 {
 	return ts.addNode(true, index, length)
 }
 
-// insertIntoLeaf inserts a new leaf node into the TreeSlab at given leaf node index, returning a new branch node index.
-// If the insert_index is 0 the branch will have the new leaf on the left and old leaf on the right.
-// If the insert_index is the length of the leaf node the branch will have the old leaf on the left and the new leaf on the right.
-// If the insert_index is the length of the leaf node, a new branch node is returned with the old leaf on the left and the new leaf on the right.
-// Otherwise the branch will take the form branch{split left, branch{new, split right}}.
-// The index of the new branch node can be used to replace the leaf node.
-func (ts *TreeSlab) insertIntoLeaf(leaf_index, insert_index, leaf uint32) uint32 {
-	l, r := ts.nodes[leaf_index].remove(insert_index, 0)
-	if l == nil {
-		return ts.addBranch(leaf, leaf_index)
-	}
-	if r == nil {
-		return ts.addBranch(leaf_index, leaf)
-	}
-	return ts.addBranch(ts.AddLeaf(l.x, l.y), ts.addBranch(leaf, ts.AddLeaf(r.x, r.y)))
-}
-
-// insertIntoBranch inserts a new leaf node into the TreeSlab at the given branch node index, returning a new branch node index.
-// The new leaf node is inserted into the left or right subtree of the branch node, depending on the insert_index.
+// insert inserts a new node into the TreeSlab at the given branch node index, returning a new branch node index.
+// The new node is inserted into the left or right subtree of the branch node, depending on the insert_index, or
+// into the leaf node at the specified insert_index.
 // The index of the new branch node can be used to replace the old branch node.
-func (ts *TreeSlab) insertIntoBranch(branch_index, insert_index, ni uint32) uint32 {
+func (ts *TreeSlab) insert(root_index, insert_index, new_node_index uint32) uint32 {
 	// short circuit out appending to index 0
 	if insert_index == 0 {
-		return ts.addBranch(ni, branch_index)
+		return ts.addBranch(new_node_index, root_index)
 	}
 
 	// short circuit out appending to index end
-	if insert_index == ts.Len(branch_index) {
-		return ts.addBranch(branch_index, ni)
+	if insert_index == ts.Len(root_index) {
+		return ts.addBranch(root_index, new_node_index)
 	}
 
 	// short circuit out inserting into a leaf
-	if ts.nodes[branch_index].leaf {
-		l, r := ts.nodes[branch_index].remove(insert_index, 0)
-		return ts.addBranch(ts.AddLeaf(l.x, l.y), ts.addBranch(ni, ts.AddLeaf(r.x, r.y)))
+	if ts.nodes[root_index].leaf {
+		l, r := ts.nodes[root_index].remove(insert_index, 0)
+		return ts.addBranch(ts.AddLeaf(l.x, l.y), ts.addBranch(new_node_index, ts.AddLeaf(r.x, r.y)))
 	}
 
 	// short circuit out appending to index in the middle of the two halves of a branch
-	bn := ts.nodes[branch_index]
+	bn := ts.nodes[root_index]
 	l_len := ts.Len(bn.x)
 	if insert_index == l_len {
-		return ts.addBranch(bn.x, ts.addBranch(ni, bn.y))
+		return ts.addBranch(bn.x, ts.addBranch(new_node_index, bn.y))
 	}
 
 	// we can now assume insert_index is in the left or right half of a branch.
 	// In the left node would be slightly simpler, but we can adjust the insert_index for the right node.
 	if insert_index < l_len {
-		return ts.insertIntoBranch(bn.x, insert_index, ni)
+		return ts.addBranch(ts.insert(bn.x, insert_index, new_node_index), bn.y)
 	}
-	return ts.insertIntoBranch(bn.y, insert_index-l_len, ni)
-}
-
-// InsertIntoNode inserts a new leaf node into the TreeSlab at the given node index, returning a new branch node index.
-func (ts *TreeSlab) InsertIntoNode(node_index, insert_index, leaf uint32) uint32 {
-	// TODO: technically this should actually be able to insert entire sub-trees, not just leaves
-	if ts.nodes[node_index].leaf {
-		return ts.insertIntoLeaf(node_index, insert_index, leaf)
-	}
-	return ts.insertIntoBranch(node_index, insert_index, leaf)
+	return ts.addBranch(bn.x, ts.insert(bn.y, insert_index-l_len, new_node_index))
 }
 
 // removeFromLeaf remove a range of indices from a leaf node in the TreeSlab, returning a new leaf or branch node index,

@@ -87,19 +87,36 @@ func (ts *TreeSlab) insertIntoLeaf(leaf_index, insert_index, leaf uint32) uint32
 // insertIntoBranch inserts a new leaf node into the TreeSlab at the given branch node index, returning a new branch node index.
 // The new leaf node is inserted into the left or right subtree of the branch node, depending on the insert_index.
 // The index of the new branch node can be used to replace the old branch node.
-func (ts *TreeSlab) insertIntoBranch(branch_index, insert_index, leaf uint32) uint32 {
-	_, left := ts.ItemCount(branch_index)
-	println(left, insert_index)
-	if insert_index < left {
-		return ts.addBranch(
-			ts.InsertIntoNode(ts.nodes[branch_index].x, insert_index, leaf),
-			ts.nodes[branch_index].y,
-		)
+func (ts *TreeSlab) insertIntoBranch(branch_index, insert_index, ni uint32) uint32 {
+	// short circuit out appending to index 0
+	if insert_index == 0 {
+		return ts.addBranch(ni, branch_index)
 	}
-	return ts.addBranch(
-		ts.nodes[branch_index].x,
-		ts.InsertIntoNode(ts.nodes[branch_index].y, insert_index-left, leaf),
-	)
+
+	// short circuit out appending to index end
+	if insert_index == ts.Len(branch_index) {
+		return ts.addBranch(branch_index, ni)
+	}
+
+	// short circuit out inserting into a leaf
+	if ts.nodes[branch_index].leaf {
+		l, r := ts.nodes[branch_index].remove(insert_index, 0)
+		return ts.addBranch(ts.AddLeaf(l.x, l.y), ts.addBranch(ni, ts.AddLeaf(r.x, r.y)))
+	}
+
+	// short circuit out appending to index in the middle of the two halves of a branch
+	bn := ts.nodes[branch_index]
+	l_len := ts.Len(bn.x)
+	if insert_index == l_len {
+		return ts.addBranch(bn.x, ts.addBranch(ni, bn.y))
+	}
+
+	// we can now assume insert_index is in the left or right half of a branch.
+	// In the left node would be slightly simpler, but we can adjust the insert_index for the right node.
+	if insert_index < l_len {
+		return ts.insertIntoBranch(bn.x, insert_index, ni)
+	}
+	return ts.insertIntoBranch(bn.y, insert_index-l_len, ni)
 }
 
 // InsertIntoNode inserts a new leaf node into the TreeSlab at the given node index, returning a new branch node index.

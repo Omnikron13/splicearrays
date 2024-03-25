@@ -173,6 +173,16 @@ func (ts *TreeSlab) RemoveFromNode(index, start, length uint32) *uint32 {
 	return ts.removeFromBranch(index, start, length)
 }
 
+// WalkTree is a recursive function that walks the tree starting at a given index.
+// It calls the given function on each node in the tree.
+func (ts *TreeSlab) WalkTree(index uint32, f func(node)) {
+	f(ts.nodes[index])
+	if !ts.nodes[index].leaf {
+		ts.WalkTree(ts.nodes[index].x, f)
+		ts.WalkTree(ts.nodes[index].y, f)
+	}
+}
+
 // GetLeaves returns a slice of all the leaf node indexes in the TreeSlab (sub)tree starting at a given index.
 func (ts *TreeSlab) GetLeaves(index uint32) []node {
 	// TODO: return pointers to nodes instead of copying them?

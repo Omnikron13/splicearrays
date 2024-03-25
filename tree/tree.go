@@ -28,6 +28,15 @@ func NewTreeSlab() TreeSlab {
 	return TreeSlab{nodes: make([]node, 0, INITIAL_SLAB_CAPACITY)}
 }
 
+// Len returns the total number of items contained in the (sub)tree rooted at the given node index.
+func (ts *TreeSlab) Len(index uint32) uint32 {
+	len := uint32(0)
+	for n := range ts.LeafIter(index) {
+		len += n.y
+	}
+	return len
+}
+
 // ItemCount returns the total number of bytes contained in the (sub)tree rooted at the given node index.
 // It also returns how many of those bytes are in the left subtree.
 func (ts *TreeSlab) ItemCount(i uint32) (uint32, uint32) {

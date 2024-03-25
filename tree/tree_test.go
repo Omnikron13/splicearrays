@@ -15,6 +15,25 @@ func TestNewTreeSlab(t *testing.T) {
 	}
 }
 
+func TestLen(t *testing.T) {
+	ts := NewTreeSlab()
+	ts.AddLeaf(0, 10)
+	t.Run("leaf", func(t *testing.T) {
+		x := ts.Len(0)
+		if x != 10 {
+			t.Error("got:", x, "expected:", 10)
+		}
+	})
+
+	t.Run("branch", func(t *testing.T) {
+		bi := ts.addBranch(0, ts.AddLeaf(10, 20))
+		x := ts.Len(bi)
+		if x != 30 {
+			t.Error("got:", x, "expected:", 30)
+		}
+	})
+}
+
 func TestByteCount(t *testing.T) {
 	t.Run("Single leaf", func(t *testing.T) {
 		ts := NewTreeSlab()

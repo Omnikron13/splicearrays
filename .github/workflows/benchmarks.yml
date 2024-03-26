@@ -51,7 +51,7 @@ jobs:
         uses: benchmark-action/github-action-benchmark@v1
         with:
           name: ${{ runner.os }} Benchmark
-          gh-repository: 'github.com/Omnikron13/splicearrays.wiki.git'
+          gh-repository: 'github.com/Omnikron13/splicearrays.wiki'
           gh-pages-branch: 'master'
           benchmark-data-dir-path: "benchmarks/${RUNNER_OS}"
           tool: 'go'

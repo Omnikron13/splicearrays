@@ -50,10 +50,6 @@ jobs:
     - name: Test
       run: go test -v ./...
 
-    - name: Bench
-      if: matrix.os != 'windows-latest'
-      run: go test -v -run='^$' -benchmem -bench=. ./...
-
     - name: Update coverage report
       if: |
         matrix.os == 'ubuntu-latest' &&

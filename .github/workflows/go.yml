@@ -48,6 +48,7 @@ jobs:
     - name: Bench
       run: go test -v -bench=. ./...
 
+  coverage:
     - name: Update coverage report
       uses: ncruces/go-coverage-report@v0
       with:

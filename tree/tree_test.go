@@ -4,6 +4,26 @@ import (
 	"testing"
 )
 
+// generates a balanced tree with 2^depth leaves with length 2^width.
+// Note that if width + depth > 32, the tree will explode.
+func generateBalancedTree(depth uint32, width uint32) (ts TreeSlab, root uint32) {
+	// TODO: perhaps try to avoid exploding with depth over (or near) 32...
+	ts = NewTreeSlab()
+	depth = 1 << depth
+	width = 1 << width
+	nodes := make([]uint32, 0, depth)
+	for i := uint32(0); i < depth; i++ {
+		nodes = append(nodes, ts.AddLeaf(i*width, width))
+	}
+	for x := depth; x > 1; x /= 2 {
+		for i := uint32(0); i < x/2; i++ {
+			nodes[i] = ts.addBranch(nodes[i*2], nodes[i*2+1])
+		}
+	}
+	root = nodes[0]
+	return
+}
+
 func TestNewTreeSlab(t *testing.T) {
 	ts := NewTreeSlab()
 	if ts.nodes.Len() != 0 {

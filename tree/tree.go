@@ -30,12 +30,11 @@ func NewTreeSlab() TreeSlab {
 }
 
 // Len returns the total number of items contained in the (sub)tree rooted at the given node index.
-func (ts *TreeSlab) Len(index uint32) uint32 {
-	len := uint32(0)
+func (ts *TreeSlab) Len(index uint32) (length uint32) {
 	for n := range ts.LeafIter(index) {
-		len += n.y
+		length += n.y
 	}
-	return len
+	return
 }
 
 // addNode adds a node to the TreeSlab.

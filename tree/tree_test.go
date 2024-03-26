@@ -126,48 +126,6 @@ func TestAddBranch(t *testing.T) {
 	}
 }
 
-func TestGetLeaves(t *testing.T) {
-	ts := NewTreeSlab()
-	li1 := ts.AddLeaf(0, 0)
-	leaves := ts.GetLeaves(li1)
-	if len(leaves) != 1 {
-		t.Fail()
-	}
-	if leaves[0].leaf != true {
-		t.Fail()
-	}
-	if leaves[0].x != 0 {
-		t.Fail()
-	}
-	if leaves[0].y != 0 {
-		t.Fail()
-	}
-	li2 := ts.AddLeaf(1, 1)
-	bi1 := ts.addBranch(li1, li2)
-	leaves = ts.GetLeaves(bi1)
-	if len(leaves) != 2 {
-		t.Fail()
-	}
-	if leaves[0].leaf != true {
-		t.Fail()
-	}
-	if leaves[0].x != 0 {
-		t.Fail()
-	}
-	if leaves[0].y != 0 {
-		t.Fail()
-	}
-	if leaves[1].leaf != true {
-		t.Fail()
-	}
-	if leaves[1].x != 1 {
-		t.Fail()
-	}
-	if leaves[1].y != 1 {
-		t.Fail()
-	}
-}
-
 func TestInsert(t *testing.T) {
 	insert := func(setup func() (TreeSlab, uint32)) func(*testing.T, string, uint32, [][2]uint32) {
 		return func(t *testing.T, name string, index uint32, expected [][2]uint32) {

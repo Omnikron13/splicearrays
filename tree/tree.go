@@ -103,6 +103,54 @@ func (ts *TreeSlab) insert(root_index, insert_index, new_node_index uint32) uint
 	return ts.addBranch(bn.x, ts.insert(bn.y, insert_index-l_len, new_node_index))
 }
 
+// Remove removes a range of indices from the specified (sub)tree, returning a new leaf or branch node index, or nil
+// if the node is entirely removed.
+func (ts *TreeSlab) Remove(index, start, length uint32) *uint32 {
+	// TODO: handle invalid inputs
+	// short circuit out if the entire node is removed
+	if start == 0 && length == ts.Len(index) {
+		return nil
+	}
+
+	// handle leaf nodes
+	if ts.nodes[index].leaf {
+		l, r := ts.nodes[index].remove(start, length)
+		if r == nil {
+			i := ts.AddLeaf(l.x, l.y)
+			return &i
+		}
+		i := ts.addBranch(ts.AddLeaf(l.x, l.y), ts.AddLeaf(r.x, r.y))
+		return &i
+	}
+
+	// removing from the right side of the branch only
+	l_len := ts.Len(ts.nodes[index].x)
+	if start >= l_len {
+		r := ts.Remove(ts.nodes[index].y, start-l_len, length)
+		if r == nil {
+			return &ts.nodes[index].x
+		}
+		bi := ts.addBranch(ts.nodes[index].x, *r)
+		return &bi
+	}
+
+	// removing from the left side of the branch only
+	if start+length <= l_len {
+		l := ts.Remove(ts.nodes[index].x, start, length)
+		if l == nil {
+			return &ts.nodes[index].y
+		}
+		bi := ts.addBranch(*l, ts.nodes[index].y)
+		return &bi
+	}
+
+	// removing from both sides of the branch
+	li := ts.Remove(ts.nodes[index].x, start, l_len-start)
+	ri := ts.Remove(ts.nodes[index].y, 0, length-(l_len-start))
+	bi := ts.addBranch(*li, *ri)
+	return &bi
+}
+
 // removeFromLeaf remove a range of indices from a leaf node in the TreeSlab, returning a new leaf or branch node index,
 // or nil if the leaf node is entirely removed.
 func (ts *TreeSlab) removeFromLeaf(index, start, length uint32) *uint32 {

@@ -255,6 +255,137 @@ func TestInsert(t *testing.T) {
 	})
 }
 
+func TestTreeRemove(t *testing.T) {
+	t.Run("leaf", func(t *testing.T) {
+		ts := NewTreeSlab()
+		ts.AddLeaf(0, 10)
+
+		t.Run("all", func(t *testing.T) {
+			n := ts.Remove(0, 0, 10)
+			if n != nil {
+				t.Error("Expected nil, got", *n, "-", ts.nodes[*n].String())
+			}
+		})
+
+		t.Run("start", func(t *testing.T) {
+			n := ts.Remove(0, 0, 5)
+			if ts.nodes[*n].String() != "leaf {index: 5 length: 5}" {
+				t.Errorf("Expected leaf {index: 5 length: 5}, got %s", ts.nodes[*n].String())
+			}
+		})
+
+		t.Run("end", func(t *testing.T) {
+			n := ts.Remove(0, 5, 5)
+			if ts.nodes[*n].String() != "leaf {index: 0 length: 5}" {
+				t.Errorf("Expected leaf {index: 0 length: 5}, got %s", ts.nodes[*n].String())
+			}
+		})
+
+		t.Run("middle", func(t *testing.T) {
+			n := ts.Remove(0, 3, 4)
+			if ts.nodes[*n].leaf {
+				t.Error("Expected branch node, got leaf node")
+			}
+			li := ts.nodes[*n].x
+			ri := ts.nodes[*n].y
+			if ts.nodes[li].String() != "leaf {index: 0 length: 3}" {
+				t.Errorf("Expected leaf {index: 0 length: 3}, got %s", ts.nodes[li].String())
+			}
+			if ts.nodes[ri].String() != "leaf {index: 7 length: 3}" {
+				t.Errorf("Expected leaf {index: 7 length: 3}, got %s", ts.nodes[ri].String())
+			}
+		})
+	})
+
+	t.Run("branch", func(t *testing.T) {
+		ts := NewTreeSlab()
+		root := ts.addBranch(
+			ts.AddLeaf(0, 10),
+			ts.AddLeaf(10, 10),
+		)
+
+		t.Run("all", func(t *testing.T) {
+			n := ts.Remove(root, 0, 20)
+			if n != nil {
+				t.Error("Expected nil, got", *n, "-", ts.nodes[*n].String())
+			}
+		})
+
+		t.Run("all left", func(t *testing.T) {
+			n := ts.Remove(root, 0, 10)
+			if ts.nodes[*n].String() != "leaf {index: 10 length: 10}" {
+				t.Errorf("Expected leaf {index: 10 length: 10}, got %s", ts.nodes[*n].String())
+			}
+		})
+
+		t.Run("all right", func(t *testing.T) {
+			n := ts.Remove(root, 10, 10)
+			if ts.nodes[*n].String() != "leaf {index: 0 length: 10}" {
+				t.Errorf("Expected leaf {index: 0 length: 10}, got %s", ts.nodes[*n].String())
+			}
+		})
+
+		t.Run("some left", func(t *testing.T) {
+			n := ts.Remove(root, 0, 5)
+			if ts.nodes[*n].leaf {
+				t.Error("Expected branch node, got leaf node")
+			}
+			l := ts.nodes[ts.nodes[*n].x]
+			r := ts.nodes[ts.nodes[*n].y]
+			if l.String() != "leaf {index: 5 length: 5}" {
+				t.Errorf("Expected left leaf {index: 5 length: 5}, got %s", l.String())
+			}
+			if r.String() != "leaf {index: 10 length: 10}" {
+				t.Errorf("Expected right leaf {index: 10 length: 10}, got %s", r.String())
+			}
+		})
+
+		t.Run("some right", func(t *testing.T) {
+			n := ts.Remove(root, 15, 5)
+			if ts.nodes[*n].leaf {
+				t.Error("Expected branch node, got leaf node")
+			}
+			l := ts.nodes[ts.nodes[*n].x]
+			r := ts.nodes[ts.nodes[*n].y]
+			if l.String() != "leaf {index: 0 length: 10}" {
+				t.Errorf("Expected left leaf {index: 0 length: 10}, got %s", l.String())
+			}
+			if r.String() != "leaf {index: 10 length: 5}" {
+				t.Errorf("Expected right leaf {index: 10 length: 5}, got %s", r.String())
+			}
+		})
+
+		t.Run("middle left", func(t *testing.T) {
+			n := ts.Remove(root, 3, 4)
+			leaves := ts.GetLeaves(*n)
+			if leaves[0].String() != "leaf {index: 0 length: 3}" ||
+				leaves[1].String() != "leaf {index: 7 length: 3}" ||
+				leaves[2].String() != "leaf {index: 10 length: 10}" {
+				t.Fail()
+			}
+		})
+
+		t.Run("middle right", func(t *testing.T) {
+			n := ts.Remove(root, 13, 4)
+			leaves := ts.GetLeaves(*n)
+			if leaves[0].String() != "leaf {index: 0 length: 10}" ||
+				leaves[1].String() != "leaf {index: 10 length: 3}" ||
+				leaves[2].String() != "leaf {index: 17 length: 3}" {
+				t.Fail()
+			}
+		})
+
+		t.Run("middle", func(t *testing.T) {
+			n := ts.Remove(root, 5, 10)
+			leaves := ts.GetLeaves(*n)
+			if leaves[0].String() != "leaf {index: 0 length: 5}" ||
+				leaves[1].String() != "leaf {index: 15 length: 5}" {
+				t.Fail()
+			}
+		})
+	})
+}
+
 func TestRemoveFromLeaf(t *testing.T) {
 	t.Run("all", func(t *testing.T) {
 		ts := NewTreeSlab()

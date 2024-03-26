@@ -1,4 +1,4 @@
 # splicearrays
-![Coverage](https://img.shields.io/badge/Coverage-79.1%25-brightgreen)
+[![Go Coverage](https://github.com/Omnikron13/splicearrays/wiki/coverage.svg)](https://raw.githack.com/wiki/Omnikron13/splicearrays/coverage.html)
 
 An experimental set of data structures written for and in Go, with the aim of cache and garbage-collector efficiency

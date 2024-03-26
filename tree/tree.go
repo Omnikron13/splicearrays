@@ -73,8 +73,7 @@ func (ts *TreeSlab) insert(root_index, insert_index, new_node_index uint32) uint
 
 	// short circuit out inserting into a leaf
 	if ts.nodes.Get(root_index).leaf {
-		n := ts.nodes.Get(root_index)
-		l, r := n.remove(insert_index, 0)
+		l, r := ts.nodes.Get(root_index).remove(insert_index, 0)
 		return ts.addBranch(ts.AddLeaf(l.x, l.y), ts.addBranch(new_node_index, ts.AddLeaf(r.x, r.y)))
 	}
 
@@ -104,8 +103,7 @@ func (ts *TreeSlab) Remove(index, start, length uint32) *uint32 {
 
 	// handle leaf nodes
 	if ts.nodes.Get(index).leaf {
-		n := ts.nodes.Get(index)
-		l, r := n.remove(start, length)
+		l, r := ts.nodes.Get(index).remove(start, length)
 		if r == nil {
 			i := ts.AddLeaf(l.x, l.y)
 			return &i
@@ -119,8 +117,7 @@ func (ts *TreeSlab) Remove(index, start, length uint32) *uint32 {
 	if start >= l_len {
 		r := ts.Remove(ts.nodes.Get(index).y, start-l_len, length)
 		if r == nil {
-			i := ts.nodes.Get(index).x
-			return &i
+			return &ts.nodes.Get(index).x
 		}
 		bi := ts.addBranch(ts.nodes.Get(index).x, *r)
 		return &bi
@@ -130,8 +127,7 @@ func (ts *TreeSlab) Remove(index, start, length uint32) *uint32 {
 	if start+length <= l_len {
 		l := ts.Remove(ts.nodes.Get(index).x, start, length)
 		if l == nil {
-			i := ts.nodes.Get(index).y
-			return &i
+			return &ts.nodes.Get(index).y
 		}
 		bi := ts.addBranch(*l, ts.nodes.Get(index).y)
 		return &bi
@@ -146,7 +142,7 @@ func (ts *TreeSlab) Remove(index, start, length uint32) *uint32 {
 
 // WalkTree is a recursive function that walks the tree starting at a given index.
 // It calls the given function on each node in the tree.
-func (ts *TreeSlab) WalkTree(index uint32, f func(node)) {
+func (ts *TreeSlab) WalkTree(index uint32, f func(*node)) {
 	f(ts.nodes.Get(index))
 	if !ts.nodes.Get(index).leaf {
 		ts.WalkTree(ts.nodes.Get(index).x, f)
@@ -163,7 +159,7 @@ func (ts *TreeSlab) GetLeaves(index uint32) []node {
 	var walkTree func(uint32)
 	walkTree = func(i uint32) {
 		if ts.nodes.Get(i).leaf {
-			leaves = append(leaves, ts.nodes.Get(i))
+			leaves = append(leaves, *ts.nodes.Get(i))
 		} else {
 			walkTree(ts.nodes.Get(i).x)
 			walkTree(ts.nodes.Get(i).y)
@@ -175,10 +171,10 @@ func (ts *TreeSlab) GetLeaves(index uint32) []node {
 }
 
 // LeafIter returns a channel that iterates over the leaf nodes in the (sub)tree starting at a given node index.
-func (ts *TreeSlab) LeafIter(index uint32) chan node {
-	c := make(chan node, 1)
+func (ts *TreeSlab) LeafIter(index uint32) chan *node {
+	c := make(chan *node, 1)
 	go func() {
-		ts.WalkTree(index, func(n node) {
+		ts.WalkTree(index, func(n *node) {
 			if n.leaf {
 				c <- n
 			}

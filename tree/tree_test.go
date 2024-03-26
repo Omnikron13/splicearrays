@@ -371,7 +371,7 @@ func TestWalkTree(t *testing.T) {
 	}
 	idx := ts.addBranch(nodes[0], nodes[1])
 	i := uint32(0)
-	ts.WalkTree(idx, func(n node) {
+	ts.WalkTree(idx, func(n *node) {
 		if n.leaf {
 			if n.x != i {
 				t.Error("Expected index", i, "got", n.x)

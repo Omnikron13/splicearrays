@@ -37,7 +37,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Go
       uses: actions/setup-go@v4
@@ -47,14 +47,6 @@ jobs:
     - name: Build
       run: go build -v ./...
 
-  Test:
-    needs: build
-    strategy:
-      matrix:
-        os: [ ubuntu-latest, macos-latest, windows-latest ]
-        version: [ 'stable', 'oldstable' ]
-    runs-on: ${{ matrix.os }}
-    steps:
     - name: Test
       run: go test -v ./...
 
@@ -62,18 +54,16 @@ jobs:
       if: matrix.os != 'windows-latest'
       run: go test -v -bench=. ./...
 
-  coverage:
-    runs-on: ubuntu-latest
-    steps:
     - name: Update coverage report
+      if: |
+        matrix.os == 'ubuntu-latest' &&
+        matrix.version == 'stable' &&
+        github.event_name == 'push'
       uses: ncruces/go-coverage-report@v0
       with:
         report: true
         chart: true
         amend: true
-      #if: |
-      #  matrix.os == 'ubuntu-latest' &&
-      #  github.event_name == 'push'
       continue-on-error: true
 
         #  coverage:

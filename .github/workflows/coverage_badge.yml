@@ -1,6 +1,8 @@
 name: Generate code coverage badge
 
 on:
+  push:
+    branches: [ "coverage-badge" ]
   pull_request:
     branches:
       - coverage-badge
@@ -35,14 +37,14 @@ jobs:
         uses: tj-actions/verify-changed-files@v16
         id: verify-changed-files
         with:
-          files: README.md
+          files: README.adoc
 
       - name: Commit changes
         if: steps.verify-changed-files.outputs.files_changed == 'true'
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add README.md
+          git add README.adoc
           git commit -m "chore: Updated coverage badge."
 
       - name: Push changes

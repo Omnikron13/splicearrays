@@ -47,12 +47,12 @@ jobs:
       - name: Store benchmark result - wiki repo
         uses: benchmark-action/github-action-benchmark@v1
         with:
-          name: "${RUNNER_OS} Benchmark"
+          name: ${{ runner.os }} Benchmark
           gh-repository: 'github.com/Omnikron13/splicearrays.wiki.git'
           gh-pages-branch: 'master'
           benchmark-data-dir-path: "benchmarks/${RUNNER_OS}"
           tool: 'go'
-          output-file-path: "${RUNNER_OS}.txt"
+          output-file-path: ${RUNNER_OS}.txt
           # Where the previous data file is stored
           external-data-json-path: ./cache/benchmark-data.json
           github-token: ${{ secrets.BENCHMARK_ACTION_BOT_TOKEN }}

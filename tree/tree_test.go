@@ -4,7 +4,6 @@ import (
 	"testing"
 )
 
-
 func TestNewTreeSlab(t *testing.T) {
 	ts := NewTreeSlab()
 	if len(ts.nodes) != 0 {

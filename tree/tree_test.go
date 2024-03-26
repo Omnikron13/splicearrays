@@ -6,10 +6,7 @@ import (
 
 func TestNewTreeSlab(t *testing.T) {
 	ts := NewTreeSlab()
-	if len(ts.nodes) != 0 {
-		t.Fail()
-	}
-	if cap(ts.nodes) != INITIAL_SLAB_CAPACITY {
+	if ts.nodes.Len() != 0 {
 		t.Fail()
 	}
 }
@@ -36,35 +33,35 @@ func TestLen(t *testing.T) {
 func TestAddNode(t *testing.T) {
 	ts := NewTreeSlab()
 	bi := ts.addNode(false, 0, 0)
-	if len(ts.nodes) != 1 {
+	if ts.nodes.Len() != 1 {
 		t.Fail()
 	}
-	if ts.nodes[0].leaf != false {
+	if ts.nodes.Get(0).leaf != false {
 		t.Fail()
 	}
-	if ts.nodes[0].x != 0 {
+	if ts.nodes.Get(0).x != 0 {
 		t.Fail()
 	}
-	if ts.nodes[0].y != 0 {
+	if ts.nodes.Get(0).y != 0 {
 		t.Fail()
 	}
-	if bi != uint32(len(ts.nodes))-1 {
+	if bi != ts.nodes.Len()-1 {
 		t.Fail()
 	}
 	li := ts.addNode(true, 0, 0)
-	if len(ts.nodes) != 2 {
+	if ts.nodes.Len() != 2 {
 		t.Fail()
 	}
-	if ts.nodes[li].leaf != true {
+	if ts.nodes.Get(li).leaf != true {
 		t.Fail()
 	}
-	if ts.nodes[li].x != 0 {
+	if ts.nodes.Get(li).x != 0 {
 		t.Fail()
 	}
-	if ts.nodes[li].y != 0 {
+	if ts.nodes.Get(li).y != 0 {
 		t.Fail()
 	}
-	if li != uint32(len(ts.nodes))-1 {
+	if li != ts.nodes.Len()-1 {
 		t.Fail()
 	}
 }
@@ -72,19 +69,19 @@ func TestAddNode(t *testing.T) {
 func TestAddLeaf(t *testing.T) {
 	ts := NewTreeSlab()
 	li := ts.AddLeaf(0, 0)
-	if len(ts.nodes) != 1 {
+	if ts.nodes.Len() != 1 {
 		t.Fail()
 	}
-	if ts.nodes[li].leaf != true {
+	if ts.nodes.Get(li).leaf != true {
 		t.Fail()
 	}
-	if ts.nodes[li].x != 0 {
+	if ts.nodes.Get(li).x != 0 {
 		t.Fail()
 	}
-	if ts.nodes[li].y != 0 {
+	if ts.nodes.Get(li).y != 0 {
 		t.Fail()
 	}
-	if li != uint32(len(ts.nodes))-1 {
+	if li != ts.nodes.Len()-1 {
 		t.Fail()
 	}
 }
@@ -92,19 +89,19 @@ func TestAddLeaf(t *testing.T) {
 func TestAddBranch(t *testing.T) {
 	ts := NewTreeSlab()
 	bi := ts.addBranch(0, 0)
-	if len(ts.nodes) != 1 {
+	if ts.nodes.Len() != 1 {
 		t.Fail()
 	}
-	if ts.nodes[bi].leaf != false {
+	if ts.nodes.Get(bi).leaf != false {
 		t.Fail()
 	}
-	if ts.nodes[bi].x != 0 {
+	if ts.nodes.Get(bi).x != 0 {
 		t.Fail()
 	}
-	if ts.nodes[bi].y != 0 {
+	if ts.nodes.Get(bi).y != 0 {
 		t.Fail()
 	}
-	if bi != uint32(len(ts.nodes))-1 {
+	if bi != ts.nodes.Len()-1 {
 		t.Fail()
 	}
 }
@@ -223,38 +220,43 @@ func TestTreeRemove(t *testing.T) {
 		ts.AddLeaf(0, 10)
 
 		t.Run("all", func(t *testing.T) {
-			n := ts.Remove(0, 0, 10)
-			if n != nil {
-				t.Error("Expected nil, got", *n, "-", ts.nodes[*n].String())
+			ni := ts.Remove(0, 0, 10)
+			if ni != nil {
+				n := ts.nodes.Get(*ni)
+				t.Error("Expected nil, got", *ni, "-", n.String())
 			}
 		})
 
 		t.Run("start", func(t *testing.T) {
-			n := ts.Remove(0, 0, 5)
-			if ts.nodes[*n].String() != "leaf {index: 5 length: 5}" {
-				t.Errorf("Expected leaf {index: 5 length: 5}, got %s", ts.nodes[*n].String())
+			ni := ts.Remove(0, 0, 5)
+			n := ts.nodes.Get(*ni)
+			if n.String() != "leaf {index: 5 length: 5}" {
+				t.Errorf("Expected leaf {index: 5 length: 5}, got %s", n.String())
 			}
 		})
 
 		t.Run("end", func(t *testing.T) {
-			n := ts.Remove(0, 5, 5)
-			if ts.nodes[*n].String() != "leaf {index: 0 length: 5}" {
-				t.Errorf("Expected leaf {index: 0 length: 5}, got %s", ts.nodes[*n].String())
+			ni := ts.Remove(0, 5, 5)
+			n := ts.nodes.Get(*ni)
+			if n.String() != "leaf {index: 0 length: 5}" {
+				t.Errorf("Expected leaf {index: 0 length: 5}, got %s", n.String())
 			}
 		})
 
 		t.Run("middle", func(t *testing.T) {
 			n := ts.Remove(0, 3, 4)
-			if ts.nodes[*n].leaf {
+			if ts.nodes.Get(*n).leaf {
 				t.Error("Expected branch node, got leaf node")
 			}
-			li := ts.nodes[*n].x
-			ri := ts.nodes[*n].y
-			if ts.nodes[li].String() != "leaf {index: 0 length: 3}" {
-				t.Errorf("Expected leaf {index: 0 length: 3}, got %s", ts.nodes[li].String())
+			li := ts.nodes.Get(*n).x
+			ri := ts.nodes.Get(*n).y
+			l := ts.nodes.Get(li)
+			r := ts.nodes.Get(ri)
+			if l.String() != "leaf {index: 0 length: 3}" {
+				t.Errorf("Expected leaf {index: 0 length: 3}, got %s", l.String())
 			}
-			if ts.nodes[ri].String() != "leaf {index: 7 length: 3}" {
-				t.Errorf("Expected leaf {index: 7 length: 3}, got %s", ts.nodes[ri].String())
+			if r.String() != "leaf {index: 7 length: 3}" {
+				t.Errorf("Expected leaf {index: 7 length: 3}, got %s", r.String())
 			}
 		})
 	})
@@ -267,33 +269,36 @@ func TestTreeRemove(t *testing.T) {
 		)
 
 		t.Run("all", func(t *testing.T) {
-			n := ts.Remove(root, 0, 20)
-			if n != nil {
-				t.Error("Expected nil, got", *n, "-", ts.nodes[*n].String())
+			ni := ts.Remove(root, 0, 20)
+			if ni != nil {
+				n := ts.nodes.Get(*ni)
+				t.Error("Expected nil, got", *ni, "-", n.String())
 			}
 		})
 
 		t.Run("all left", func(t *testing.T) {
-			n := ts.Remove(root, 0, 10)
-			if ts.nodes[*n].String() != "leaf {index: 10 length: 10}" {
-				t.Errorf("Expected leaf {index: 10 length: 10}, got %s", ts.nodes[*n].String())
+			ni := ts.Remove(root, 0, 10)
+			n := ts.nodes.Get(*ni)
+			if n.String() != "leaf {index: 10 length: 10}" {
+				t.Errorf("Expected leaf {index: 10 length: 10}, got %s", n.String())
 			}
 		})
 
 		t.Run("all right", func(t *testing.T) {
-			n := ts.Remove(root, 10, 10)
-			if ts.nodes[*n].String() != "leaf {index: 0 length: 10}" {
-				t.Errorf("Expected leaf {index: 0 length: 10}, got %s", ts.nodes[*n].String())
+			ni := ts.Remove(root, 10, 10)
+			n := ts.nodes.Get(*ni)
+			if n.String() != "leaf {index: 0 length: 10}" {
+				t.Errorf("Expected leaf {index: 0 length: 10}, got %s", n.String())
 			}
 		})
 
 		t.Run("some left", func(t *testing.T) {
 			n := ts.Remove(root, 0, 5)
-			if ts.nodes[*n].leaf {
+			if ts.nodes.Get(*n).leaf {
 				t.Error("Expected branch node, got leaf node")
 			}
-			l := ts.nodes[ts.nodes[*n].x]
-			r := ts.nodes[ts.nodes[*n].y]
+			l := ts.nodes.Get(ts.nodes.Get(*n).x)
+			r := ts.nodes.Get(ts.nodes.Get(*n).y)
 			if l.String() != "leaf {index: 5 length: 5}" {
 				t.Errorf("Expected left leaf {index: 5 length: 5}, got %s", l.String())
 			}
@@ -304,11 +309,11 @@ func TestTreeRemove(t *testing.T) {
 
 		t.Run("some right", func(t *testing.T) {
 			n := ts.Remove(root, 15, 5)
-			if ts.nodes[*n].leaf {
+			if ts.nodes.Get(*n).leaf {
 				t.Error("Expected branch node, got leaf node")
 			}
-			l := ts.nodes[ts.nodes[*n].x]
-			r := ts.nodes[ts.nodes[*n].y]
+			l := ts.nodes.Get(ts.nodes.Get(*n).x)
+			r := ts.nodes.Get(ts.nodes.Get(*n).y)
 			if l.String() != "leaf {index: 0 length: 10}" {
 				t.Errorf("Expected left leaf {index: 0 length: 10}, got %s", l.String())
 			}
@@ -366,7 +371,7 @@ func TestWalkTree(t *testing.T) {
 	}
 	idx := ts.addBranch(nodes[0], nodes[1])
 	i := uint32(0)
-	ts.WalkTree(idx, func(n node) {
+	ts.WalkTree(idx, func(n *node) {
 		if n.leaf {
 			if n.x != i {
 				t.Error("Expected index", i, "got", n.x)

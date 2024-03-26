@@ -70,3 +70,4 @@ jobs:
           git diff --staged
           cat "${RUNNER_OS}.txt"
           ls cache
+          cat cache/benchmark-data.json

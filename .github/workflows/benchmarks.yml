@@ -68,3 +68,5 @@ jobs:
         run: |
           git status
           git diff --staged
+          cat "${RUNNER_OS}.txt"
+          ls cache

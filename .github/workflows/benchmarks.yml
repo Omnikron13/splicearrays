@@ -55,7 +55,7 @@ jobs:
           output-file-path: ${{ runner.os }}.txt
           # Where the previous data file is stored
           external-data-json-path: ./cache/benchmark-data.json
-          github-token: ${{ secrets.BENCHMARK_ACTION_BOT_TOKEN }}
+          github_token: ${{ github.token }}
           auto-push: true
           comment-always: true
           # Show alert with commit comment on detecting possible performance regression

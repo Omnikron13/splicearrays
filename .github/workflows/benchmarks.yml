@@ -55,6 +55,7 @@ jobs:
 
       #- name: Upload benchmark data
       #  run: |
+      #    cd benchmark-data-repository
       #    git status
       #    git diff --staged
       #    cat "${RUNNER_OS}.txt"

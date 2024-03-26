@@ -37,17 +37,6 @@ func (ts *TreeSlab) Len(index uint32) uint32 {
 	return len
 }
 
-// ItemCount returns the total number of bytes contained in the (sub)tree rooted at the given node index.
-// It also returns how many of those bytes are in the left subtree.
-func (ts *TreeSlab) ItemCount(i uint32) (uint32, uint32) {
-	if ts.nodes[i].leaf {
-		return ts.nodes[i].y, ts.nodes[i].y
-	}
-	left, _ := ts.ItemCount(ts.nodes[i].x)
-	right, _ := ts.ItemCount(ts.nodes[i].y)
-	return left + right, left
-}
-
 // addNode adds a node to the TreeSlab.
 // It returns the index of the added node.
 func (ts *TreeSlab) addNode(leaf bool, x, y uint32) uint32 {

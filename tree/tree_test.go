@@ -476,3 +476,25 @@ func TestLeafIter(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func BenchmarkIndexIter(b *testing.B) {
+	// TODO: move this to a helper for reuse
+	ts := NewTreeSlab()
+	var nodes [64]uint32
+	for i := 0; i < 64; i++ {
+		nodes[i] = ts.AddLeaf(uint32(i*1024), uint32(1024))
+	}
+	for x := 64; x > 1; x /= 2 {
+		for i := 0; i < x/2; i++ {
+			nodes[i] = ts.addBranch(nodes[i*2], nodes[i*2+1])
+		}
+	}
+	idx := nodes[0]
+
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		for i := range ts.IndexIter(idx) {
+			_ = i
+		}
+	}
+}

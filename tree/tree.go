@@ -217,3 +217,18 @@ func (ts *TreeSlab) LeafIter(index uint32) chan node {
 	}()
 	return c
 }
+
+// IndexIter returns a channel that iterates over the indices represented by the leaf nodes in the (sub)tree starting
+// at a given node index.
+func (ts *TreeSlab) IndexIter(index uint32) chan uint32 {
+	c := make(chan uint32, 64)
+	go func() {
+		for n := range ts.LeafIter(index) {
+			for i := n.x; i < n.x+n.y; i++ {
+				c <- i
+			}
+		}
+		close(c)
+	}()
+	return c
+}

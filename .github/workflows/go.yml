@@ -47,6 +47,10 @@ jobs:
     - name: Build
       run: go build -v ./...
 
+  Test:
+    needs: build
+    runs-on: ${{ matrix.os }}
+    steps:
     - name: Test
       run: go test -v ./...
 

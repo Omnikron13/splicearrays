@@ -53,23 +53,6 @@ func (n *node) String() string {
 	}
 }
 
-// split splits a leaf node into two leaf nodes at the given index.
-// If the index is 0, nil & the original node is returned.
-// If the index is the length of the node, the original node & nil is returned.
-// Otherwise, two new nodes are created and returned.
-func (n *node) split(index uint32) (*node, *node) {
-	// TODO: just delegate to remove?
-	// TODO: deal with branch nodes
-	// TODO: error handling (e.g. if index > n.y)
-	if index == 0 {
-		return nil, n
-	} else if index == n.y {
-		return n, nil
-	} else {
-		return &node{leaf: true, x: n.x, y: index}, &node{leaf: true, x: n.x + index, y: n.y - index}
-	}
-}
-
 // remove removes a range of indices from a leaf node.
 // Returns either two leaves if both sides of the range are not empty, one leaf & nil if one side is empty,
 // or nil, nil if the entire range of the leaf is removed.

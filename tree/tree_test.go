@@ -374,30 +374,15 @@ func TestTreeRemove(t *testing.T) {
 }
 
 func TestWalkTree(t *testing.T) {
-	ts := NewTreeSlab()
-	// TODO: tidy this setup, perhaps move to a helper for reuse
-	nodes := make([]uint32, 0)
-	for i := 0; i < 16; i++ {
-		nodes = append(nodes, ts.AddLeaf(uint32(i), uint32(i)))
-	}
-	for i := 0; i < 16/2; i++ {
-		nodes[i] = ts.addBranch(nodes[i*2], nodes[i*2+1])
-	}
-	for i := 0; i < 16/4; i++ {
-		nodes[i] = ts.addBranch(nodes[i*2], nodes[i*2+1])
-	}
-	for i := 0; i < 16/8; i++ {
-		nodes[i] = ts.addBranch(nodes[i*2], nodes[i*2+1])
-	}
-	idx := ts.addBranch(nodes[0], nodes[1])
+	ts, idx := generateBalancedTree(4, 0)
 	i := uint32(0)
 	ts.WalkTree(idx, func(n *node) {
 		if n.leaf {
 			if n.x != i {
 				t.Error("Expected index", i, "got", n.x)
 			}
-			if n.y != i {
-				t.Error("Expected length", i, "got", n.y)
+			if n.y != 1 {
+				t.Error("Expected length 1 got", n.y)
 			}
 			i++
 		}

@@ -172,7 +172,7 @@ func (ts *TreeSlab) GetLeaves(index uint32) []node {
 
 // LeafIter returns a channel that iterates over the leaf nodes in the (sub)tree starting at a given node index.
 func (ts *TreeSlab) LeafIter(index uint32) chan *node {
-	c := make(chan *node, 1)
+	c := make(chan *node, 4)
 	go func() {
 		ts.WalkTree(index, func(n *node) {
 			if n.leaf {

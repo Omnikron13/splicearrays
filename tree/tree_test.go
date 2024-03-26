@@ -416,18 +416,7 @@ func TestLeafIter(t *testing.T) {
 }
 
 func TestIndexIter(t *testing.T) {
-	// TODO: move this to a helper for reuse
-	ts := NewTreeSlab()
-	var nodes [4]uint32
-	for i := 0; i < 4; i++ {
-		nodes[i] = ts.AddLeaf(uint32(i*10), uint32(10))
-	}
-	for x := 4; x > 1; x /= 2 {
-		for i := 0; i < x/2; i++ {
-			nodes[i] = ts.addBranch(nodes[i*2], nodes[i*2+1])
-		}
-	}
-	idx := nodes[0]
+	ts, idx := generateBalancedTree(4, 4)
 	i := uint32(0)
 	for n := range ts.IndexIter(idx) {
 		if n != i {

@@ -33,7 +33,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
-        version: [ 'stable', 'oldstable', '1.18' ]
+        version: [ 'stable', 'oldstable', '1.18.10' ]
     runs-on: ${{ matrix.os }}
 
     steps:

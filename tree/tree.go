@@ -150,24 +150,13 @@ func (ts *TreeSlab) WalkTree(index uint32, f func(*node)) {
 	}
 }
 
+// TODO: remove this? rename it at least, if it really serves any purpose...
 // GetLeaves returns a slice of all the leaf node indexes in the TreeSlab (sub)tree starting at a given index.
-func (ts *TreeSlab) GetLeaves(index uint32) []node {
-	// TODO: return pointers to nodes instead of copying them?
-	// TODO: short circuit out for 0 & 1 total nodes
-	leaves := make([]node, 0, ts.nodes.Len()/2+1)
-
-	var walkTree func(uint32)
-	walkTree = func(i uint32) {
-		if ts.nodes.Get(i).leaf {
-			leaves = append(leaves, *ts.nodes.Get(i))
-		} else {
-			walkTree(ts.nodes.Get(i).x)
-			walkTree(ts.nodes.Get(i).y)
-		}
+func (ts *TreeSlab) GetLeaves(index uint32) (leaves []node) {
+	for n := range ts.LeafIter(index) {
+		leaves = append(leaves, *n)
 	}
-	walkTree(index)
-
-	return leaves
+	return
 }
 
 // LeafIter returns a channel that iterates over the leaf nodes in the (sub)tree starting at a given node index.

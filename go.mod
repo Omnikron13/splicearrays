@@ -1,3 +1,3 @@
-module github.com/omnikron13/splicearrays/v2
+module github.com/omnikron13/splicearrays
 
 go 1.22.1

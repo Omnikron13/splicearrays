@@ -1,6 +1,7 @@
 package tree
 
 import (
+	"math/rand"
 	"testing"
 )
 
@@ -19,6 +20,42 @@ func generateBalancedTree(depth uint32, width uint32) (ts TreeSlab, root uint32)
 		for i := uint32(0); i < x/2; i++ {
 			nodes[i] = ts.addBranch(nodes[i*2], nodes[i*2+1])
 		}
+	}
+	root = nodes[0]
+	return
+}
+
+// generateUnbalancedTree generates a tree with 2^depth leaves with length 2^width.
+// The level of imbalance is random, due to the method of generating the tree from the bottom up.
+// The skew parameter controls the direction of the imbalance of the last abs(skew) branches, with
+// negative skew favoring the left branch and positive skew favoring the right.
+func generateUnbalancedTree(depth uint32, width uint32, skew int) (ts TreeSlab, root uint32) {
+	ts = NewTreeSlab()
+	depth = 1 << depth
+	width = 1 << width
+	var skewLeft bool
+	if skew < 0 {
+		skew = -skew
+		skewLeft = true
+	}
+	nodes := make([]uint32, depth)
+	for i := range nodes {
+		nodes[i] = ts.AddLeaf(uint32(i)*width, width)
+	}
+	for ; len(nodes) > 1+skew; nodes = nodes[1:] {
+		rand.Shuffle(len(nodes), func(i, j int) {
+			nodes[i], nodes[j] = nodes[j], nodes[i]
+		})
+		nodes[1] = ts.addBranch(nodes[0], nodes[1])
+	}
+	for ; len(nodes) > 1; nodes = nodes[1:] {
+		if ts.Len(nodes[0]) < ts.Len(nodes[1]) && skewLeft {
+			nodes[0], nodes[1] = nodes[1], nodes[0]
+		}
+		if ts.Len(nodes[0]) > ts.Len(nodes[1]) && !skewLeft {
+			nodes[0], nodes[1] = nodes[1], nodes[0]
+		}
+		nodes[1] = ts.addBranch(nodes[0], nodes[1])
 	}
 	root = nodes[0]
 	return

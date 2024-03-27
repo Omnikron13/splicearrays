@@ -441,4 +441,34 @@ func BenchmarkIndexIter(b *testing.B) {
 			}
 		}
 	})
+
+   b.Run("unbalanced random", func(b *testing.B) {
+      ts, idx := generateUnbalancedTree(12, 4, 0)
+      b.ResetTimer()
+      for n := 0; n < b.N; n++ {
+         for i := range ts.IndexIter(idx) {
+            _ = i
+         }
+      }
+   })
+
+   b.Run("unbalanced left", func(b *testing.B) {
+      ts, idx := generateUnbalancedTree(12, 4, -2)
+      b.ResetTimer()
+      for n := 0; n < b.N; n++ {
+         for i := range ts.IndexIter(idx) {
+            _ = i
+         }
+      }
+   })
+
+   b.Run("unbalanced right", func(b *testing.B) {
+      ts, idx := generateUnbalancedTree(12, 4, 2)
+      b.ResetTimer()
+      for n := 0; n < b.N; n++ {
+         for i := range ts.IndexIter(idx) {
+            _ = i
+         }
+      }
+   })
 }

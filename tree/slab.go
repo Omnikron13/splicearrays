@@ -23,16 +23,18 @@ func (s *MinimalSlab[T]) Add(items ...T) (start uint32, length uint32) {
 	return
 }
 
-func (s *MinimalSlab[T]) Get(index uint32) *T {
-	return &(*s)[index]
+func (s *MinimalSlab[T]) Get(index uint32) T {
+	return (*s)[index]
 }
 
-func (s *MinimalSlab[T]) Len() uint32 {
-	return uint32(len(*s))
+func (s MinimalSlab[T]) Len() uint32 {
+	return uint32(len(s))
 }
 
-func (s *MinimalSlab[T]) SliceIter(start uint32, length uint32) chan *T {
-	c := make(chan *T, 1)
+func (s *MinimalSlab[T]) SliceIter(start uint32, end uint32) chan T {
+   // TODO Error handling
+   length := end - start
+	c := make(chan T, 1)
 	go func() {
 		for i := start; i < start+length; i++ {
 			c <- s.Get(i)
@@ -41,3 +43,4 @@ func (s *MinimalSlab[T]) SliceIter(start uint32, length uint32) chan *T {
 	}()
 	return c
 }
+

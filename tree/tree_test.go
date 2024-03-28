@@ -465,9 +465,21 @@ func BenchmarkIndexIter(b *testing.B) {
 	})
 
    b.Run("unbalanced random", func(b *testing.B) {
-      ts, idx := generateUnbalancedTree(12, 4, 0)
+      c := make(chan TreeSlab, 4)
+      go func() {
+         for n := 0; n < b.N; n++ {
+            ts, _ := generateUnbalancedTree(12, 4, 0)
+            c <- ts
+         }
+         close(c)
+      }()
+
       b.ResetTimer()
       for n := 0; n < b.N; n++ {
+         b.StopTimer()
+         ts := <- c
+         idx := ts.nodes.Len() - 1
+         b.StartTimer()
          for i := range ts.IndexIter(idx) {
             _ = i
          }
@@ -475,9 +487,21 @@ func BenchmarkIndexIter(b *testing.B) {
    })
 
    b.Run("unbalanced left", func(b *testing.B) {
-      ts, idx := generateUnbalancedTree(12, 4, -2)
+      c := make(chan TreeSlab, 4)
+      go func() {
+         for n := 0; n < b.N; n++ {
+            ts, _ := generateUnbalancedTree(12, 4, -2)
+            c <- ts
+         }
+         close(c)
+      }()
+
       b.ResetTimer()
       for n := 0; n < b.N; n++ {
+         b.StopTimer()
+         ts := <- c
+         idx := ts.nodes.Len() - 1
+         b.StartTimer()
          for i := range ts.IndexIter(idx) {
             _ = i
          }
@@ -485,12 +509,25 @@ func BenchmarkIndexIter(b *testing.B) {
    })
 
    b.Run("unbalanced right", func(b *testing.B) {
-      ts, idx := generateUnbalancedTree(12, 4, 2)
+      c := make(chan TreeSlab, 4)
+      go func() {
+         for n := 0; n < b.N; n++ {
+            ts, _ := generateUnbalancedTree(12, 4, 2)
+            c <- ts
+         }
+         close(c)
+      }()
+
       b.ResetTimer()
       for n := 0; n < b.N; n++ {
+         b.StopTimer()
+         ts, _ := <-c
+         idx := ts.nodes.Len() - 1
+         b.StartTimer()
          for i := range ts.IndexIter(idx) {
             _ = i
          }
       }
    })
 }
+

@@ -6,6 +6,8 @@ type Slab[T any] interface {
 	Add(items ...T) (start uint32, length uint32)
 	// Get returns the item at the given index.
 	Get(index uint32) T
+	// GetRef returns a reference to the item at the given index.
+	GetRef(index uint32) *T
 	// Len returns the total number of items in the slab.
 	Len() uint32
 	// SliceIter returns a channel that iterates over length items from the start index.
@@ -25,6 +27,10 @@ func (s *MinimalSlab[T]) Add(items ...T) (start uint32, length uint32) {
 
 func (s MinimalSlab[T]) Get(index uint32) T {
 	return s[index]
+}
+
+func (s MinimalSlab[T]) GetRef(index uint32) *T {
+	return &s[index]
 }
 
 func (s MinimalSlab[T]) Len() uint32 {

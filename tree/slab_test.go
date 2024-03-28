@@ -16,13 +16,13 @@ func TestMinimalSlab_Add(t *testing.T) {
 func TestMinimalSlab_Get(t *testing.T) {
 	s := MinimalSlab[int]{}
 	s.Add(1, 2, 3)
-	if *s.Get(0) != 1 {
+	if s.Get(0) != 1 {
 		t.Error("Expected 1, got", s.Get(0))
 	}
-	if *s.Get(1) != 2 {
+	if s.Get(1) != 2 {
 		t.Error("Expected 2, got", s.Get(1))
 	}
-	if *s.Get(2) != 3 {
+	if s.Get(2) != 3 {
 		t.Error("Expected 3, got", s.Get(2))
 	}
 }
@@ -40,7 +40,7 @@ func TestMinimalSlab_SliceIter(t *testing.T) {
 	s.Add(1, 2, 3)
 	i := 1
 	for x := range s.SliceIter(0, 3) {
-		if *x != i {
+		if x != i {
 			t.Error("Expected 1, got", x)
 		}
 		i++

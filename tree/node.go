@@ -56,7 +56,7 @@ func (n *node) String() string {
 // remove removes a range of indices from a leaf node.
 // Returns either two leaves if both sides of the range are not empty, one leaf & nil if one side is empty,
 // or nil, nil if the entire range of the leaf is removed.
-func (n *node) remove(start, length uint32) (*node, *node) {
+func (n node) remove(start, length uint32) (*node, *node) {
 	// TODO: deal with branch nodes
 	// TODO: handle invalid inputs (start out of bounds, start+length out of bounds, split at 0 or n.y)
 	if length == n.y {

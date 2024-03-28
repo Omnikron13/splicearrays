@@ -61,6 +61,28 @@ func generateUnbalancedTree(depth uint32, width uint32, skew int) (ts TreeSlab, 
 	return
 }
 
+func BenchmarkGenerateUnbalancedTree(b *testing.B) {
+   b.Run("generate random", func(b *testing.B) {
+      for n := 0; n < b.N; n++ {
+         ts, idx := generateUnbalancedTree(12, 4, 0)
+         _, _ = ts, idx
+      }
+   })
+   b.Run("generate left skew", func(b *testing.B) {
+      for n := 0; n < b.N; n++ {
+         ts, idx := generateUnbalancedTree(12, 4, -2)
+         _, _ = ts, idx
+      }
+   })
+   b.Run("generate right skew", func(b *testing.B) {
+      for n := 0; n < b.N; n++ {
+         ts, idx := generateUnbalancedTree(12, 4, 2)
+         _, _ = ts, idx
+      }
+   })
+}
+
+
 func TestNewTreeSlab(t *testing.T) {
 	ts := NewTreeSlab()
 	if ts.nodes.Len() != 0 {

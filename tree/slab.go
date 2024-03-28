@@ -38,8 +38,8 @@ func (s MinimalSlab[T]) Len() uint32 {
 }
 
 func (s MinimalSlab[T]) SliceIter(start uint32, end uint32) chan T {
-   // TODO Error handling
-   length := end - start
+	// TODO Error handling
+	length := end - start
 	c := make(chan T, 1)
 	go func() {
 		for i := start; i < start+length; i++ {

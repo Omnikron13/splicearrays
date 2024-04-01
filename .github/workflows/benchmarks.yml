@@ -26,7 +26,7 @@ jobs:
       - name: Run benchmark
         env:
           cpu: ${{ runner.os == 'macOS' && '1,2,3' || '1,2,3,4' }}
-        run: go test -run='^$' -cpu ${{env.cpu}} -benchtime=10s -benchmem -bench=. ./... | tee "${RUNNER_OS}.txt"
+        run: go test -timeout=0 -run=\0 -cpu ${{env.cpu}} -benchtime=10s -benchmem -bench=. ./... | tee "${RUNNER_OS}.txt"
           
       # Download previous benchmark result from cache (if exists)
       - name: Download previous benchmark data

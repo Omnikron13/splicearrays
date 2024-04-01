@@ -2,8 +2,9 @@ package tree
 
 import (
 	"math/rand"
+	"runtime"
+	"sync"
 	"testing"
-   "sync"
 )
 
 // generates a balanced tree with 2^depth leaves with length 2^width.
@@ -468,23 +469,18 @@ func BenchmarkIndexIter(b *testing.B) {
    preGenUnbalancedTrees := func(depth, width uint32, skew, n int) chan TreeSlab {
       b.Helper()
       c := make(chan TreeSlab, n)
-      // TODO: fix deadlock for values > 1
-      const MAX_WORKERS = 1
       var wg sync.WaitGroup
-      workers := min(MAX_WORKERS, n)
-      for w := 0; w < workers; w++ {
+      for w := min(runtime.NumCPU(), n); w > 0; w-- {
          wg.Add(1)
          done := sync.OnceFunc(wg.Done)
-         go func() {
-            b.Helper()
-            for n := 0; n < max(n, cap(c)); n++ {
+         go func(w, n int) {
+            for i := 0; i < n; i++ {
                ts, _ := generateUnbalancedTree(depth, width, skew)
                c <- ts
-               if len(c) == cap(c) {
-                  done()
-               }
             }
-         }()
+            done()
+         }(w, n/w)
+         n -= n / w
       }
       wg.Wait()
       return c

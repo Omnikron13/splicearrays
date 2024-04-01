@@ -117,7 +117,7 @@ func (ts *TreeSlab) Remove(index, start, length uint32) *uint32 {
 	if start >= l_len {
 		r := ts.Remove(ts.nodes.Get(index).y, start-l_len, length)
 		if r == nil {
-			return &ts.nodes.Get(index).x
+			return &ts.nodes.GetRef(index).x
 		}
 		bi := ts.addBranch(ts.nodes.Get(index).x, *r)
 		return &bi
@@ -127,7 +127,7 @@ func (ts *TreeSlab) Remove(index, start, length uint32) *uint32 {
 	if start+length <= l_len {
 		l := ts.Remove(ts.nodes.Get(index).x, start, length)
 		if l == nil {
-			return &ts.nodes.Get(index).y
+			return &ts.nodes.GetRef(index).y
 		}
 		bi := ts.addBranch(*l, ts.nodes.Get(index).y)
 		return &bi
@@ -143,7 +143,7 @@ func (ts *TreeSlab) Remove(index, start, length uint32) *uint32 {
 // WalkTree is a recursive function that walks the tree starting at a given index.
 // It calls the given function on each node in the tree.
 func (ts *TreeSlab) WalkTree(index uint32, f func(*node)) {
-	f(ts.nodes.Get(index))
+	f(ts.nodes.GetRef(index))
 	if !ts.nodes.Get(index).leaf {
 		ts.WalkTree(ts.nodes.Get(index).x, f)
 		ts.WalkTree(ts.nodes.Get(index).y, f)

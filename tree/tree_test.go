@@ -465,23 +465,33 @@ func BenchmarkIndexIter(b *testing.B) {
 		}
 	})
 
-   b.Run("unbalanced random", func(b *testing.B) {
+   preGenUnbalancedTrees := func(depth, width uint32, skew, n int) chan TreeSlab {
+      b.Helper()
+      c := make(chan TreeSlab, n)
+      // TODO: fix deadlock for values > 1
+      const MAX_WORKERS = 1
       var wg sync.WaitGroup
-      c := make(chan TreeSlab, 4)
-      workers := min(4, b.N)
+      workers := min(MAX_WORKERS, n)
       for w := 0; w < workers; w++ {
          wg.Add(1)
          done := sync.OnceFunc(wg.Done)
          go func() {
             b.Helper()
-            for n := 0; n < (b.N/workers)+w; n++ {
-               ts, _ := generateUnbalancedTree(12, 4, 0)
+            for n := 0; n < max(n, cap(c)); n++ {
+               ts, _ := generateUnbalancedTree(depth, width, skew)
                c <- ts
-               done()
+               if len(c) == cap(c) {
+                  done()
+               }
             }
          }()
       }
       wg.Wait()
+      return c
+   }
+
+   b.Run("unbalanced random", func(b *testing.B) {
+      c := preGenUnbalancedTrees(12, 4, 0, b.N)
 
       b.ResetTimer()
       for n := 0; n < b.N; n++ {
@@ -496,20 +506,7 @@ func BenchmarkIndexIter(b *testing.B) {
    })
 
    b.Run("unbalanced left", func(b *testing.B) {
-      var o sync.Once
-      var wg sync.WaitGroup
-      wg.Add(1)
-      c := make(chan TreeSlab, 4)
-      go func() {
-         b.Helper()
-         for n := 0; n < b.N; n++ {
-            ts, _ := generateUnbalancedTree(12, 4, -2)
-            c <- ts
-            o.Do(wg.Done)
-         }
-         close(c)
-      }()
-      wg.Wait()
+      c := preGenUnbalancedTrees(12, 4, -2, b.N)
 
       b.ResetTimer()
       for n := 0; n < b.N; n++ {
@@ -524,20 +521,7 @@ func BenchmarkIndexIter(b *testing.B) {
    })
 
    b.Run("unbalanced right", func(b *testing.B) {
-      var o sync.Once
-      var wg sync.WaitGroup
-      wg.Add(1)
-      c := make(chan TreeSlab, 4)
-      go func() {
-         b.Helper()
-         for n := 0; n < b.N; n++ {
-            ts, _ := generateUnbalancedTree(12, 4, 2)
-            c <- ts
-            o.Do(wg.Done)
-         }
-         close(c)
-      }()
-      wg.Wait()
+      c := preGenUnbalancedTrees(12, 4, -2, b.N)
 
       b.ResetTimer()
       for n := 0; n < b.N; n++ {
